@@ -1,0 +1,632 @@
+$(document).ready(function() {
+	$('.numberOnly').keypress(function(event) {
+		return isNumber(event, this)
+	});
+	$('.signDecimal').keypress(function(event) {
+		return isSignDecimal(event, this)
+	});
+	$('.decimalNumber').keypress(function(event) {
+		return isDecimalNumber(event, this)
+	});
+});
+function isSignDecimal(evt, element) {
+	var charCode = (evt.which) ? evt.which : event.keyCode;
+	if ((charCode != 45 || $(element).val().indexOf('-') != -1)
+			&& (charCode != 46 || $(element).val().indexOf('.') != -1)
+			&& (charCode < 48 || charCode > 57))
+		return false;
+	return true;
+}
+function isNumber(evt, element) {
+	var charCode = (evt.which) ? evt.which : event.keyCode;
+	if (charCode > 31 && (charCode < 48 || charCode > 57))
+		return false;
+	return true;
+}
+function isDecimalNumber(evt, element) {
+	var charCode = (evt.which) ? evt.which : event.keyCode;
+	if ((charCode != 46 || $(element).val().indexOf('.') != -1)
+			&& (charCode < 48 || charCode > 57))
+		return false;
+	return true;
+}
+
+function submitLink(obj, url) {
+	clicker();
+	var form = obj.document.forms[0];
+	var urlnew = url;
+	form.action = urlnew;
+	form.method = 'POST';
+	form.submit();
+}
+
+function controllerToSubmit(form, url) {
+	clicker();
+	form.target = "_top";
+	form.method = 'POST';
+	form.action = url;
+	form.submit();
+}
+
+function clicker() {
+	var thediv = document.getElementById('displaybox');
+	if (typeof (thediv) != 'undefined' && thediv != null) {
+		if (thediv.style.display == "none") {
+			thediv.style.display = "";
+			thediv.innerHTML = "<table style='width:100%;height:100%;' border='0'><tr><td align='center'><table style='width:50%;height:50%;' border='0'><tr><td width='50%' align='right'><font color='#FFFFFF' size='5'><strong>Please Wait</strong></font></td><td width='50%' align='left'><font color='#FFFFFF' size='5'><strong><p id='waitingP'>.</p></strong></font></td></tr></table></td></tr></table>";
+			setInterval(incrementWait, 500);
+		} else {
+			thediv.style.display = "none";
+			thediv.innerHTML = '';
+		}
+	}
+}
+
+function showContribution(form) {
+	if (document.getElementById('turms').checked) {
+		document.getElementById('contribution_div').style.display = "inline";
+		document.getElementById('charity_detail').style.display = "inline";
+		document.getElementById('submit_div').style.display = "inline";
+	} else {
+		document.getElementById('contribution_div').style.display = "none";
+		document.getElementById('charity_detail').style.display = "none";
+		document.getElementById('submit_div').style.display = "none";
+	}
+}
+
+function ShowCharityContriList(flag, previousTotal) {
+	var i;
+	var count = 0;
+	var data = "";
+	var tot_c = 0.0;
+	var first_part = "<table width='100%' class='table' border='1' cellspacing='1' cellpadding='1'><th width='50%'><div align='Center'>Charity</div></th><th width='50%'><div align='Center'>Amount (Rs.)</div></th>";
+	var second_part = "<tr><td colspan='2'>&nbsp;</td></tr></table>";
+	var flag_value = parseInt(flag);
+	var buffer = 0;
+	var amount = document.getElementById('amount_same').value;
+	var ob = document.getElementById('charity_List');
+	
+	for (i = 0; i < ob.options.length; i++) {
+		if (ob.options[i].selected) {
+			if (flag_value == 2) {
+				data = data
+						+ "<tr><td>"
+						+ ob.options[i].value.split(",")[0]
+						+ "</td><td><input type='text' id='charityamount' name='charityamount' value='"
+						+ ob.options[i].value.split(",")[1]
+						+ "' onblur='TestNumeric(this)' /></td>";
+				buffer = 1;
+				data = data
+						+ "<input type='hidden' name='charitycompo1' value='"
+						+ ob.options[i].value + "' />";
+				tot_c = tot_c + parseInt(ob.options[i].value.split(",")[1]);
+				document.getElementById('amount_same').disabled = true;
+			}
+
+			if (flag_value == 1) {
+				data = data
+						+ "<tr><td>"
+						+ ob.options[i].value.split(",")[0]
+						+ "</td><td><input type='text' id='charityamount' name='charityamount' value='100' readonly/></td>";
+				buffer = 1
+				tot_c = tot_c + parseFloat(amount);
+				data = data
+						+ "<input type='hidden' name='charitycompo1' value='"
+						+ ob.options[i].value + "' />";
+				document.getElementById('amount_same').disabled = false;
+				document.getElementById('sameFill_check').value = 0;
+			}
+			if (flag_value == 4) {
+				data = data
+						+ "<tr><td width='50%'>"
+						+ ob.options[i].value.split("`")[1]
+						+ "</td><td><input type='text' id='charityamount' name='charityamount' value='100.00' onblur='TestNumeric2(this)' /></td></tr>";
+				buffer = 1;
+				data = data
+						+ "<input type='hidden' name='charitycompo' value='"
+						+ ob.options[i].value + "' />";
+				tot_c = tot_c + 100.00;
+				document.getElementById('amount_same').disabled = true;
+				document.getElementById('All').disabled = true;
+			}
+			if (flag_value == 3) {
+				data = data
+						+ "<tr><td width='50%'>"
+						+ ob.options[i].value.split("`")[1]
+						+ "</td><td><input type='text' id='charityamount' name='charityamount' value='"
+						+ amount + "' readonly/></td></tr>";
+				buffer = 1
+				tot_c = tot_c + parseFloat(amount);
+				data = data
+						+ "<input type='hidden' name='charitycompo' value='"
+						+ ob.options[i].value + "' />";
+				document.getElementById('amount_same').disabled = false;
+				document.getElementById('All').disabled = false;
+			}
+			extra_info = 1;
+		}
+
+	}
+	tot_c = tot_c + parseInt(previousTotal);
+	if (flag_value == 3) {
+		var back_tot = document.getElementsByName('charityamount1');
+		for (i = 0; i < back_tot.length; i++) {
+			tot_c = tot_c + parseFloat(back_tot[i].value);
+			document.getElementById('amount_same').disabled = false;
+		}
+	}
+	if (flag_value == 4) {
+		var back_tot = document.getElementsByName('charityamount1');
+		for (i = 0; i < back_tot.length; i++) {
+			tot_c = tot_c + parseFloat(back_tot[i].value);
+			document.getElementById('amount_same').disabled = true;
+			document.getElementById('All').disabled = true;
+		}
+	}
+
+	if (buffer == 1) {
+		document.getElementById('charity_detail').innerHTML = first_part + data
+				+ second_part;
+		document.getElementById('charity_detail').style.display = "inline";
+		if (flag_value == 1 || flag_value == 2) {
+			document.getElementById('total').style.display = "inline";
+		}
+		document.getElementById('total_amount').value = setPoint(tot_c);
+	}
+}
+
+var extra_info = 0;
+function TestNumeric(val) {
+	var flag = 0;
+	var amount = val.value;
+
+	if (amount == '') {
+		val.value = '100';
+		val.focus = true;
+		flag = 1;
+	}
+
+	if (parseInt(amount) < 100 && flag == 0) {
+		alert("Donation Amount cannot be less than Rs 100.00. If you want to stop your contribution, please go to Stop Contribution link.");
+		val.value = '100';
+		val.focus = true;
+		flag = 1;
+	}
+
+	if (IsNumeric(amount) && flag == 0) {
+		if (amount.indexOf(".") == -1) {
+			amount = amount + ".00";
+			val.value = amount;
+		}
+	} else {
+		val.value = '100.00';
+		val.focus = true;
+		flag = 1;
+	}
+
+	var amount1 = document.getElementsByName('charityamount');
+	var tot_c = 0.0;
+	var i;
+	for (i = 0; i < amount1.length; i++) {
+		tot_c = tot_c + parseFloat(amount1[i].value);
+	}
+
+	document.getElementById('total_amount').value = setPoint(tot_c + "");
+
+}
+function TestNumeric1(val) {
+	var flag = 0;
+	var amount = val.value;
+
+	if (amount == '') {
+		val.value = '100.00';
+		val.focus = true;
+		flag = 1;
+	}
+
+	if (parseInt(amount) < parseFloat(100.00) && flag == 0) {
+		alert("Donation Amount cannot be less than Rs 100.00. If you want to stop your contribution, please go to Stop Contribution link. ");
+		val.value = '100.00';
+		val.focus = true;
+		flag = 1;
+	}
+
+	if (IsNumeric(amount) && flag == 0) {
+		if (amount.indexOf(".") == -1) {
+			amount = amount + ".00";
+			val.value = amount;
+		}
+	} else {
+		val.value = '100.00';
+		val.focus = true;
+		flag = 1;
+	}
+	if (flag == 0) {
+		var amount1 = document.getElementsByName('charityamount');
+		var tot_c = 0;
+		var i;
+		for (i = 0; i < amount1.length; i++) {
+			amount1[i].value = amount;
+		}
+		document.getElementById('total_amount').value = setPoint((parseFloat(amount) * amount1.length)
+				+ "");
+	} else {
+		var amount1 = document.getElementsByName('charityamount');
+		var tot_c = 0;
+		var i;
+		for (i = 0; i < amount1.length; i++) {
+			amount1[i].value = "100.00";
+		}
+		document.getElementById('total_amount').value = setPoint((parseFloat(100.00) * amount1.length)
+				+ "");
+	}
+
+}
+
+function TestNumeric2(val) {
+	var flag = 0;
+	var tot = 0.0;
+	var amount = val.value;
+
+	if (amount == '') {
+		val.value = '100.00';
+		val.focus = true;
+		// flag=1;
+	}
+
+	if (parseFloat(amount) < parseFloat(100.00) && flag == 0) {
+		alert("Donation Amount cannot be less than Rs 100.00. If you want to stop your contribution, please go to Stop Contribution link.");
+		val.value = '100.00';
+		val.focus = true;
+		// flag=1;
+	}
+
+	if (IsNumeric(amount) && flag == 0) {
+		if (amount.indexOf(".") == -1) {
+			amount = amount + ".00";
+			val.value = amount;
+		}
+	} else {
+		val.value = '100.00';
+		val.focus = true;
+		// flag=1;
+	}
+	var i;
+
+	var amount11 = document.getElementsByName('charityamount1');
+	for (i = 0; i < amount11.length; i++) {
+		tot = tot + parseFloat(amount11[i].value);
+	}
+	document.getElementById('total_amount1').value = setPoint(tot + "");
+	if (extra_info == 1) {
+		var amount1 = document.getElementsByName('charityamount');
+		for (i = 0; i < amount1.length; i++) {
+			tot = tot + parseFloat(amount1[i].value);
+		}
+	}
+
+	document.getElementById('total_amount').value = setPoint(tot + "");
+}
+
+function TestNumeric4(val) {
+	var flag = 0;
+	var amount = val.value;
+
+	if (amount == '') {
+		val.value = '100.00';
+		val.focus = true;
+		flag = 1;
+	}
+
+	if (parseFloat(amount) < parseFloat(100.00) && flag == 0) {
+		alert("Donation Amount cannot be less than Rs 100.00. If you want to stop your contribution, please go to Stop Contribution link.");
+		val.value = '100.00';
+		val.focus = true;
+		flag = 1;
+	}
+
+	if (IsNumeric(amount) && flag == 0) {
+		if (amount.indexOf(".") == -1) {
+			amount = amount + ".00";
+			val.value = amount;
+		}
+
+	} else {
+		val.value = '100.00';
+		val.focus = true;
+		flag = 1;
+	}
+	if (flag == 0) {
+		var amount1 = document.getElementsByName('charityamount');
+		var i;
+		for (i = 0; i < amount1.length; i++) {
+			amount1[i].value = amount;
+		}
+	}
+	var tot = 0.0;
+	var amount11 = document.getElementsByName('charityamount1');
+	for (i = 0; i < amount11.length; i++) {
+		tot = tot + parseFloat(amount11[i].value);
+	}
+	document.getElementById('total_amount1').value = setPoint(tot + "");
+	document.getElementById('total_amount').value = setPoint(((parseFloat(amount) * amount1.length) + tot)
+			+ "");
+}
+
+function IsNumeric(a) {
+	var i;
+	if (a.indexOf(".") != -1) {
+		var spl = a.split(".");
+		if (IsNumeric1(spl[0]) && IsNumeric1(spl[1])) {
+			if (spl[1].length > 2) {
+				alert("Up to Two digit are allowed After Decimal Please re-enter a valid Value");
+				return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	if (a.length == 0) {
+		alert("Amount is Not Valid");
+		return false;
+	}
+	var ValidChars = "0123456789";
+	var Char;
+	var IsNumber = true;
+	for (i = 0; i < a.length && IsNumber == true; i++) {
+		Char = a.charAt(i);
+		if (ValidChars.indexOf(Char) == -1) {
+			IsNumber = false;
+		}
+	}
+	if (IsNumber == false)
+		alert("Amount is Not Valid");
+	return IsNumber;
+}
+
+function IsNumeric1(a) {
+	var i;
+	if (a.length == 0) {
+		return false;
+	}
+	var ValidChars = "0123456789";
+	var Char;
+	var IsNumber = true;
+	for (i = 0; i < a.length && IsNumber == true; i++) {
+		Char = a.charAt(i);
+		if (ValidChars.indexOf(Char) == -1) {
+			IsNumber = false;
+		}
+	}
+	return IsNumber;
+}
+
+function SaveData(form) {
+	var i;
+	var count = 0;
+	var data = "";
+	var first_part = "<table width='100%' border='1' cellspacing='1' cellpadding='1'><tr bgcolor='#0091A0'><td><font color='#FFFFFF'><strong>Charity </strong></font></td><td><font color='#FFFFFF'><strong>Amount</strong></font></td><td><font color='#FFFFFF'><strong>Charity </strong></font></td><td><font color='#FFFFFF'><strong>Amout</strong></font></td></tr><tr><td colspan='2'>&nbsp;</td></tr>";
+	var second_part = "<tr><td colspan='2'>&nbsp;</td></tr></table>";
+	var amount = document.getElementsByName('charityamount');
+	var char_compo = document.getElementsByName('charitycompo1');
+	for (i = 0; i < char_compo.length; i++) {
+		if (count % 2 == 0)
+			data = data + "<tr><td>" + char_compo[i].value.split("`")[1]
+					+ "</td><td>" + amount[count].value + "</td>";
+		else
+			data = data + "<td>" + char_compo[i].value.split("`")[1]
+					+ "</td><td>" + amount[count].value + "</td></tr>";
+		count++;
+	}
+
+	document.getElementById('save_detail').innerHTML = first_part + data
+			+ second_part;
+	document.getElementById('save_detail').style.display = "inline";
+	document.getElementById('charity_detail').style.display = "none";
+	document.getElementById('contribution_div').style.display = "none";
+	document.getElementById('charity_detail').style.display = "none";
+	form.save.disabled = true;
+	form.turms.disabled = true;
+	form.next.disabled = true;
+	form.submit.disabled = false;
+}
+
+function SaveDataModi(form) {
+	var i;
+	var count = 0;
+	var data = "";
+	var first_part = "<table width='100%' border='1' cellspacing='1' cellpadding='1'> <tr bgcolor='#0091A0'><td><font color='#FFFFFF'><strong>Charity </strong></font></td><td><font color='#FFFFFF'><strong>Amount</strong></font></td><td><font color='#FFFFFF'><strong>Charity </strong></font></td><td><font color='#FFFFFF'><strong>Amout</strong></font></td></tr><tr><td colspan='2'>&nbsp;</td></tr>";
+	var second_part = "<tr><td colspan='2'>&nbsp;</td></tr></table>";
+
+	var amount = document.getElementsByName('charityamount1');
+	var char_compo = document.getElementsByName('charitycompo1');
+	for (i = 0; i < char_compo.length; i++) {
+		if (count % 2 == 0)
+			data = data
+					+ "<tr><td bgcolor='#0091A0'><font color='#FFFFFF'><strong>"
+					+ char_compo[i].value.split("`")[1] + "</strong></td><td>"
+					+ amount[i].value + "</td>";
+		else
+			data = data
+					+ "<td bgcolor='#0091A0'><font color='#FFFFFF'><strong>"
+					+ char_compo[i].value.split("`")[1] + "</strong></td><td>"
+					+ amount[i].value + "</td></tr>";
+		count++;
+	}
+	amount = document.getElementsByName('charityamount');
+	char_compo = document.getElementsByName('charitycompo');
+	for (i = 0; i < char_compo.length; i++) {
+		if (count % 2 == 0)
+			data = data
+					+ "<tr><td bgcolor='#0091A0'><font color='#FFFFFF'><strong>"
+					+ char_compo[i].value.split("`")[1] + "</strong></td><td>"
+					+ amount[i].value + "</td>";
+		else
+			data = data
+					+ "<td bgcolor='#0091A0'><font color='#FFFFFF'><strong>"
+					+ char_compo[i].value.split("`")[1] + "</strong></td><td>"
+					+ amount[i].value + "</td></tr>";
+		count++;
+	}
+
+	document.getElementById('save_detail').innerHTML = first_part + data
+			+ second_part;
+	document.getElementById('save_detail').style.display = "inline";
+	document.getElementById('charity_detail').style.display = "none";
+	document.getElementById('contribution_div').style.display = "none";
+	document.getElementById('charity_detail').style.display = "none";
+	document.getElementById('old').style.display = "none";
+
+	form.next.disabled = true;
+	form.save.disabled = true;
+	form.submit.disabled = false;
+}
+
+function SaveDataStop(form) {
+
+	var i;
+	var count = 0;
+	var data = "";
+	var first_part = "<table width='100%' border='1' cellspacing='1' cellpadding='1'><tr bgcolor='#0091A0'><td><font color='#FFFFFF'><strong>Charity </strong></font></td><td><font color='#FFFFFF'><strong>Amount</strong></font></td><td><font color='#FFFFFF'><strong>Charity </strong></font></td><td><font color='#FFFFFF'><strong>Amount</strong></font></td></tr><tr><td colspan='2'>&nbsp;</td></tr>";
+	var second_part = "<tr><td colspan='2'>&nbsp;</td></tr></table>";
+	var amount = document.getElementsByName('charityamount1');
+	var compo = document.getElementsByName('charitycompo1');
+	var del = document.getElementsByName('del');
+	for (i = 0; i < amount.length; i++) {
+		if (del[i].checked) {
+			amount[i].value = "0";
+		} else {
+			if (count % 2 == 0) {
+				data = data
+						+ "<tr><td bgcolor='#0091A0'><font color='#FFFFFF'><strong>"
+						+ compo[i].value.split("`")[1] + "</strong></td><td>"
+						+ amount[i].value + "</td>";
+			} else {
+				data = data
+						+ "<td bgcolor='#0091A0'><font color='#FFFFFF'><strong>"
+						+ compo[i].value.split("`")[1] + "</strong></td><td>"
+						+ amount[i].value + "</td></tr>";
+			}
+			count++;
+		}
+	}
+	document.getElementById('save_detail').innerHTML = first_part + data
+			+ second_part;
+	document.getElementById('save_detail').style.display = "inline";
+	document.getElementById('contribution_div').style.display = "none";
+	form.save.disabled = true;
+	form.next.disabled = true;
+	form.submit.disabled = false;
+}
+function del_charity(ob) {
+	if (ob.checked) {
+		ob.value = 0;
+	}
+}
+
+function Next(ob, status) {
+	if (extra_info == 0 && parseInt(status) == 1) {
+		alert("Select at Least one Charity Contribution");
+		document.getElementById("next").checked = false;
+
+		return;
+	}
+	if (ob.checked) {
+		document.getElementById('save').disabled = false;
+	} else {
+		document.getElementById('save').disabled = true;
+	}
+}
+
+function setTransaction(form) {
+	// form.action.value=type;
+	form.submit();
+}
+
+function SetAllCheckBoxes(FieldName, CheckValue) {
+	var field = document.getElementsByName(FieldName);
+	for (var i = 0; i < field.length; i++)
+		field[i].checked = CheckValue;
+}
+
+function AmountTotal() {
+	var total_con = 0.0;
+	var field = document.getElementsByName('del');
+	var field2 = document.getElementsByName('charityamount1');
+	for (var i = 0; i < field.length; i++) {
+		if (!field[i].checked) {
+			total_con = total_con + parseFloat(field2[i].value);
+		}
+	}
+	document.getElementById('total_amount').value = setPoint(total_con + "");
+}
+
+function selectAll(ob) {
+	if (ob.checked) {
+		SetAllCheckBoxes("del", true);
+		document.getElementById('total_amount').value = 0;
+	} else {
+		var total_con = 0.0;
+		var field = document.getElementsByName('charityamount1');
+		for (var i = 0; i < field.length; i++)
+			total_con = total_con + parseFloat(field[i].value);
+		document.getElementById('total_amount').value = setPoint(total_con + "");
+		SetAllCheckBoxes("del", false);
+	}
+}
+
+function setPoint(s) {
+	var s = s.toString();
+	s = s + "";
+	var result = "0.00";
+	if (s.indexOf(".") != -1) {
+		var t = s.split(".");
+		if (t[1].length > 2) {
+			result = Math.round((parseFloat(s)) * 100) / 100;
+		}
+		if (t[1].length == 1) {
+			result = s + "0";
+		}
+	} else {
+		result = s + ".00";
+	}
+	return result;
+}
+
+function submitMe2(url, text) {
+	var urlnew = url
+	var field1 = text;
+	document.forms1.action = urlnew;
+	document.forms1.toaction.value = field1;
+	document.forms1.submit();
+	return;
+}
+
+/*document.addEventListener("contextmenu", function(event) {
+	event.preventDefault();
+}, false);*/
+
+
+if (document.addEventListener) {
+	document.addEventListener("contextmenu", function(event) {
+		event.preventDefault();
+	}, false);
+}
+else {
+	document.attachEvent("contextmenu", function(event) {
+		event.returnValue = false;
+	});
+}
+if (top != self) {
+	top.location.replace(location);
+}
+window.onload = noBack();
+function noBack() {
+	window.history.forward();
+}
+
+window.onpageshow = function(evt) {
+	if (evt.persisted)
+		noBack()
+}

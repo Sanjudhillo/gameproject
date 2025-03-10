@@ -1,0 +1,551 @@
+function isValid(obj, type){
+	var valid = isValidInput(obj.value, type, obj.id);
+	if(type == 'Numeric'){
+		if(obj.value.length == 0){
+			obj.value = 0;
+		}		
+	}
+	if(obj.value.length > 0){
+		return valid;
+	}else{
+		//document.getElementById(obj.id + 'Err').innerHTML="Please fill this value";
+		//document.getElementById(obj.id + 'Err').style.display = "";
+		return false;
+	}
+}
+
+function isValidLvr(obj, type){
+	if(type == 'Numeric'){	
+		if(obj.value.length == 0){
+			obj.value = 0;
+		}		
+	}
+	if(obj.value.length > 0){
+		return isValidInput(obj.value, type, obj.id);
+	}else{
+		document.getElementById(obj.id + 'Err').innerHTML="Please fill this value";
+		document.getElementById(obj.id + 'Err').style.display = "";
+		return false;	
+	}
+}
+
+function isValidInputMandatory(obj, type){
+	if(type == 'Numeric' || type == 'Float'){	
+		if(obj.value.length == 0){ 
+			obj.value = 0;
+		}		
+	}
+	var val = String(obj.value).trim();
+	if(val.length > 0){
+		return isValidInput(obj.value, type, obj.id);
+	}else{
+		document.getElementById(obj.id + 'Err').innerHTML="Please fill this value";
+		document.getElementById(obj.id + 'Err').style.display = "";
+		return false;	
+	}
+}
+
+function isValidInput(value, type, objid){
+	var alpha = /^[a-zA-Z\s]*$/;
+	var numeric = /^[0-9]*$/;
+	var alphanumeric = /^[0-9a-zA-Z\s]*$/;
+	var address = /^[0-9a-zA-Z.,-/\s]*$/;
+
+	if(type == 'Numeric'){
+		if(/^[0-9]*$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			return true;	
+		}else{
+			document.getElementById(objid + 'Err').innerHTML="Only numbers are allowed";
+			document.getElementById(objid + 'Err').style.display = "";			
+			document.getElementById(objid).value = "0";
+			return false;
+		}
+	}
+	if(type == 'NumericLTZero'){
+		if(/^[0-9-]*$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			return true;	
+		}else{
+			document.getElementById(objid + 'Err').innerHTML="Only numbers are allowed";
+			document.getElementById(objid + 'Err').style.display = "";			
+			document.getElementById(objid).value = "0";
+			return false;
+		}
+	}
+	
+	if(type == 'NumericGTZero'){
+		if (/^[0-9]*$/.test(value)) {
+			if (value <= 0) {
+				document.getElementById(objid + 'Err').innerHTML = "Invalid Amount";
+				document.getElementById(objid + 'Err').style.display = "";
+				document.getElementById(objid).value = "0";
+				return false;
+			} else {
+				document.getElementById(objid + 'Err').innerHTML = "";
+				document.getElementById(objid + 'Err').style.display = "none";
+				return true;
+			}
+		}else{
+			document.getElementById(objid + 'Err').innerHTML="Only numbers are allowed";
+			document.getElementById(objid + 'Err').style.display = "";			
+			document.getElementById(objid).value = "0";
+			return false;
+		}
+	}
+	if(type == 'Float'){
+		if(!isNaN(value)){
+			if (parseFloat(value) > 0) {
+				document.getElementById(objid + 'Err').innerHTML = "";
+				document.getElementById(objid + 'Err').style.display = "none";
+				document.getElementById(objid).value = parseFloat(value)
+						.toFixed(2);
+				return true;
+			}
+			else{
+				document.getElementById(objid + 'Err').innerHTML="Please fill this value";
+				document.getElementById(objid + 'Err').style.display = "";
+				return false;	
+			}
+				
+		}else{
+			document.getElementById(objid + 'Err').innerHTML="Only numbers are allowed";
+			document.getElementById(objid + 'Err').style.display = "";	
+			var zero = 0;
+			document.getElementById(objid).value = zero.toFixed(2);
+			return false;
+		}
+	}
+	if(type == 'Float1'){
+		if(!isNaN(value)){
+			if (parseFloat(value)) {
+				document.getElementById(objid + 'Err').innerHTML = "";
+				document.getElementById(objid + 'Err').style.display = "none";
+				return true;
+			}
+			else{
+/*				document.getElementById(objid + 'Err').innerHTML="Please enter valid value";
+				document.getElementById(objid + 'Err').style.display = "";
+*/				document.getElementById(objid).value = "0.0";
+				document.getElementById(objid + 'Err').innerHTML = "";
+				document.getElementById(objid + 'Err').style.display = "none";
+				return false;	
+			}
+				
+		}else{
+			document.getElementById(objid + 'Err').innerHTML="Only numbers are allowed";
+			document.getElementById(objid + 'Err').style.display = "";	
+			var zero = 0;
+			document.getElementById(objid).value = zero.toFixed(2);
+			return false;
+		}
+	}
+	
+	if(type == 'Alphabets'){
+		if(/^[a-zA-Z\s]*$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			document.getElementById(objid).value = value.replace(/\s\s+/g, ' ');
+			return true;	
+		}else{
+			document.getElementById(objid + 'Err').innerHTML="Only characters are allowed";
+			document.getElementById(objid + 'Err').style.display = "";
+			document.getElementById(objid).value = "";
+			return false;
+		}
+	}
+	if(type == 'AlphaNumeric'){
+		if(/^[0-9a-zA-Z\s]*$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			document.getElementById(objid).value = value.replace(/\s\s+/g, ' ');			
+			return true;	
+		}else{	
+			document.getElementById(objid + 'Err').innerHTML="Only alphanumerics are allowed";
+			document.getElementById(objid + 'Err').style.display = "";		
+			document.getElementById(objid).value = "";
+			return false;			
+		}
+	}
+
+	if(type == 'Address'){
+		if(/^[0-9a-zA-Z.,-/\s]*$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			if(value.length <= 250){
+				document.getElementById(objid).value = value.replace(/\s\s+/g, ' ');
+				return true;
+			}else{
+				document.getElementById(objid + 'Err').innerHTML="Maximum length allowed is 250 chars";
+				document.getElementById(objid + 'Err').style.display = "";	
+				document.getElementById(objid).value = "";
+				return false;							
+			}
+		}else{	
+			document.getElementById(objid + 'Err').innerHTML="Only alphanumerics and .,-/ are allowed";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;			
+		}
+	}
+
+	if(type == 'Name'){
+		if(/^[a-zA-Z.\s]*$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			if(value.length <= 100){
+				document.getElementById(objid).value = value.replace(/\s\s+/g, ' ');
+				return true;
+			}else{
+				document.getElementById(objid + 'Err').innerHTML="Maximum length allowed is 100 chars";
+				document.getElementById(objid + 'Err').style.display = "";	
+				document.getElementById(objid).value = "";
+				return false;							
+			}
+		}else{	
+			document.getElementById(objid + 'Err').innerHTML="Only characters and . are allowed";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;			
+		}
+	}
+	
+	if(type == 'Date'){
+		if(/^[0-9a-zA-Z-\s]*$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			return true;	
+		}else{	
+			document.getElementById(objid + 'Err').innerHTML="Please enter valid date.";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;			
+		}
+	}	
+
+	if(type == 'PinCode'){
+		var filter = /^[0-9]*$/;
+		if (document.getElementById(objid).value == '' || parseInt(document.getElementById(objid).value, 6) == 0
+				|| !(document.getElementById(objid).value.length == 6)) {
+			document.getElementById(objid + 'Err').innerHTML="Please enter valid pin code.";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;
+		} else if (!filter.test(document.getElementById(objid).value)) {	
+			document.getElementById(objid + 'Err').innerHTML="Please enter valid pin code.";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;			
+		} else {
+			document.getElementById(objid).value = getTrimmedString(document.getElementById(objid).value);
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			return true;
+		}
+	}
+	
+	if(type == 'Email'){
+		if(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(value)){
+			document.getElementById(objid + 'Err').innerHTML="Please enter valid email address.";
+			document.getElementById(objid + 'Err').style.display = "none";
+			return true;	
+		}else{	
+			document.getElementById(objid + 'Err').innerHTML="Please enter valid email address.";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;			
+		}
+	}
+	
+	if(type == 'Mobile'){
+		var filter = /^[1-9][0-9]+$/;
+		if (document.getElementById(objid).value == '' || parseInt(document.getElementById(objid).value, 10) == 0
+				|| !(document.getElementById(objid).value.length == 10)) {
+			document.getElementById(objid + 'Err').innerHTML="Please enter valid mobile number.";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;
+		} else if (!filter.test(document.getElementById(objid).value)) {
+			document.getElementById(objid + 'Err').innerHTML="Please enter valid mobile number.";
+			document.getElementById(objid + 'Err').style.display = "";	
+			document.getElementById(objid).value = "";
+			return false;
+		} else {
+			document.getElementById(objid).value = getTrimmedString(document.getElementById(objid).value);
+			document.getElementById(objid + 'Err').innerHTML="";
+			document.getElementById(objid + 'Err').style.display = "none";
+			return true;
+		}
+	}
+	if(type == 'All'){
+		if (value != null && value.length > 0) {
+			if (isElementdefined(document.getElementById(objid + 'Err'))) {
+				document.getElementById(objid + 'Err').innerHTML = "";
+				document.getElementById(objid + 'Err').style.display = "none";
+			}
+			return true;	
+		} else {
+			if (isElementdefined(document.getElementById(objid + 'Err'))) {
+			document.getElementById(objid + 'Err').innerHTML="Please fill this value";
+			document.getElementById(objid + 'Err').style.display = "";	
+			return false;
+			}
+			return true;
+		}
+	}
+	
+}
+
+
+
+function parseDate(s) {
+	  var months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
+	                jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+	  var p = s.split('-');
+	  return new Date(p[2], months[p[1].toLowerCase()], p[0]);
+}
+
+var alpha = "[0-9!$%^&*()_+|~=`{}:;<>?@#.,-/]";
+var numeric = "[ A-Za-z!$%^&*()_+|~=`{}:;<>?@#.,-/]";
+var numericltzero = "[ A-Za-z!$%^&*()_+|~=`{}:;<>?@#.,/]";
+var alphanumeric = "[!$%^&*()_+|~=`{}:;<>?@#.,-/]";
+var address = "[!$%^&*()_+|~=`{}:;<>?@#]";
+var namevalue = "[0-9!$%^&*()_+|~=`{}:;<>?@#,-]";
+var decimalNum = "[ A-Za-z!$%^&*()_+|~=`{}:;<>?@#,-/\\']";
+
+function onKeyValidate(obj ,e, charVal) {
+	var message;
+/*	if(charVal == '[ A-Za-z0-9.,-/]'){
+		message = "Only alphanumerics and .,-/ are allowed";
+	}else if(charVal == '[ A-Za-z]'){
+		message = "Only characters are allowed";
+	}else if(charVal == '[0-9]'){
+		message = "Only numbers are allowed";
+	}else if(charVal == '[ A-Za-z0-9]'){
+		message = "Only alphanumerics are allowed";
+	}
+*/	
+	if(charVal != 'All'){
+		if(charVal == '[!$%^&*()_+|~=`{}:;<>?@#]'){
+			message = "Only alphanumerics and .,-/ are allowed";
+		}else if(charVal == '[0-9!$%^&*()_+|~=`{}:;<>?@#.,-/]'){
+			message = "Only characters are allowed";
+		}else if(charVal == '[ A-Za-z!$%^&*()_+|~=`{}:;<>?@#.,-/]'){
+			message = "Only numbers are allowed";
+		}else if(charVal == '[!$%^&*()_+|~=`{}:;<>?@#.,-/]'){
+			message = "Only alphanumerics are allowed";
+		}else if(charVal == '[0-9!$%^&*()_+|~=`{}:;<>?@#,-]'){
+			message = "Only characters and . are allowed";
+		}else if(charVal == '[ A-Za-z!$%^&*()_+|~=`{}:;<>?@#.,/]'){
+			message = "Only numbers are allowed";
+		}else if(charVal == "[ A-Za-z!$%^&*()_+|~=`{}:;<>?@#,-/\\']"){
+			message = "Only floating points are allowed";
+		}
+		
+		var keynum;
+		var keyChars = /[\x00\x08]/;
+		var validChars = new RegExp(charVal);
+		if (window.event) {
+			keynum = e.keyCode;
+		} else if (e.which) {
+			keynum = e.which;
+		}
+		var keychar = String.fromCharCode(keynum);	
+		if (!validChars.test(keychar)) {
+			document.getElementById(obj.id+'Err').style.display = 'none';
+			document.getElementById(obj.id+'Err').innerHTML = '';		
+			return keychar;		
+		} else {
+			document.getElementById(obj.id+'Err').style.display = '';
+			document.getElementById(obj.id+'Err').innerHTML = message;		
+			return false;		
+		}
+	}else{
+		document.getElementById(obj.id+'Err').style.display = 'none';
+		document.getElementById(obj.id+'Err').innerHTML = '';		
+		return keychar;				
+	}
+}
+
+function onKeyValidateLength(e, charVal, maxlength, obj) {
+	var message;
+	if(charVal == '[!$%^&*()_+|~=`{}:;<>?@#]'){
+		message = "Only alphanumerics and .,-/ are allowed";
+	}else if(charVal == '[0-9!$%^&*()_+|~=`{}:;<>?@#.,-/]'){
+		message = "Only characters are allowed";
+	}else if(charVal == '[ A-Za-z!$%^&*()_+|~=`{}:;<>?@#.,-/]'){
+		message = "Only numbers are allowed";
+	}else if(charVal == '[!$%^&*()_+|~=`{}:;<>?@#.,-/]'){
+		message = "Only alphanumerics are allowed";
+	}
+	
+	var keynum;
+	var keyChars = /[\x00\x08]/;
+	var validChars = new RegExp(charVal);
+	if (window.event) {
+		keynum = e.keyCode;
+	} else if (e.which) {
+		keynum = e.which;
+	}
+	var keychar = String.fromCharCode(keynum);
+	if(obj.value.length < Number(maxlength)){
+		if(!validChars.test(keychar)){
+			document.getElementById(obj.id+'Err').style.display = 'none';
+			document.getElementById(obj.id+'Err').innerHTML = '';				
+			return keychar;					
+		}else{
+			document.getElementById(obj.id+'Err').style.display = '';
+			document.getElementById(obj.id+'Err').innerHTML = message;		
+			return false;				
+		}		
+	}else if(!keyChars.test(keychar)){
+		document.getElementById(obj.id+'Err').style.display = '';
+		document.getElementById(obj.id+'Err').innerHTML = 'Maximum lenght allowed - ' + maxlength;		
+		return false;						
+	}
+/*	
+	if (!validChars.test(keychar) && obj.value.length < Number(maxlength)) {
+		document.getElementById(obj.id+'Err').style.display = 'none';
+		document.getElementById(obj.id+'Err').innerHTML = '';				
+		return keychar;		
+	} else {
+		document.getElementById(obj.id+'Err').style.display = '';
+		document.getElementById(obj.id+'Err').innerHTML = message;		
+		return false;	
+	}
+*/}
+
+function isElementdefined(element){
+	if (typeof(element) != 'undefined' && element != null)
+	{
+	  return true;
+	}
+	else{
+	return false;
+	}
+}
+
+function getTrimmedString(string) {
+	if (typeof String.prototype.trim !== 'function') {
+		return string.replace(/^\s+|\s+$/g, '');
+	} else {
+		return string.trim();
+	}
+}
+
+function dashboard(form) {
+	form.action = "dashboard";
+	form.submit();
+	return true;
+}
+
+function investProofBack(url, form) {
+	clicker();
+	if (submitForm()) {
+		document.getElementById(form).method = 'POST';
+		document.getElementById(form).action = "invProofSubmission";
+		//document.getElementById("back").value = "true";
+		//document.getElementById("destinationPage").value = url;
+		//alert(document.getElementById("destinationPage").value);
+		document.getElementById(form).destinationPage.value = url; 
+		document.getElementById(form).submit();		
+	}
+}
+
+function investProofBack1(url, form) {
+	clicker();
+	if (finalSubmit()) {
+		document.getElementById(form).method = 'POST';
+		document.getElementById(form).action = "invProofSubmission";
+		document.getElementById("destinationPage").value = url;
+		document.getElementById(form).submit();		
+	}
+}
+
+function home(){
+	location.href='dashboard';
+}
+
+function openPrintWindow(formId,action) {
+	//ace.settingFunction.navbar_fixed(null, false);
+	window.open('about:blank', 'print_popup', 'width=1000,height=800');
+	document.getElementById(formId).action = action;
+	document.getElementById(formId).target = "print_popup";
+	document.getElementById(formId).method = "post";
+	document.getElementById(formId).submit();
+}
+
+function printWindow() {
+	var printButton = document.getElementById("printButton");
+	printButton.style.visibility = 'hidden';
+	if(isElementdefined(document.getElementById('closeButton'))){
+		var closeButton = document.getElementById("closeButton");
+		closeButton.style.visibility = 'hidden';
+	}
+	window.print();
+	printButton.style.visibility = 'visible';
+	if(isElementdefined(document.getElementById('closeButton'))){
+		var closeButton = document.getElementById("closeButton");
+		closeButton.style.visibility = 'visible';
+	}
+	
+}
+
+function truncateObjectIfZeroValue(obj) {
+	var enteredAmount = obj.value;
+	if (Number(enteredAmount) == 0) {
+		obj.value = '';
+	}
+}
+
+function controllerToSubmitFormAndDisableSubmitButton(form, url) {
+	form.target = "_top";
+	form.method = 'POST';
+	form.action = url;
+	form.submit();
+}
+
+function controllerToSubmit(form, url) {
+	clicker();
+	form.target = "_top";
+	form.method = 'POST';
+	form.action = url;
+	form.submit();
+}
+
+function controllerToSubmitAndDisableButton(form, url, idbutton) {
+	clicker();
+	form.target = "_top";
+	form.method = 'POST';
+	form.action = url;
+	document.getElementById(idbutton).disabled = "true";	
+	form.submit();
+}
+
+function goToPage(pageNo){
+	clicker();
+	//var formName = document.getElementsByTagName('form')[3].id;
+	document.getElementById('page').value=pageNo;
+	document.getElementsByTagName('form')[3].submit();
+}
+
+function nextPrev(pageNo){
+	clicker();
+	pageNumber = pageNo.substring(pageNo.lastIndexOf('=')+1);
+	document.getElementById('page').value=pageNumber;
+	//var formName = document.getElementsByTagName('form')[3].id;
+	document.getElementsByTagName('form')[3].submit();
+}
+
+function disableAllButtons(){
+	var collection = [];
+$(".btn:not(:disabled)").each(function(a){
+  if( !$(this).is(':disabled') ) {
+    collection.push(this);
+    $(this).prop('disabled', true);
+  }
+});
+return collection;
+}

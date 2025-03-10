@@ -1,0 +1,2220 @@
+function addRowToTable(tableid, rowId, numRows) {
+	
+	var totalRws = document.getElementById(tableid).rows.length;
+	var totalRows = 0;
+	for(var i=0; i< totalRws; i++){		
+		var rowObj = document.getElementById(tableid).rows[i];
+		if(rowObj.id){
+			if(document.getElementById(rowObj.id + ".isHidden").value == 0){
+				totalRows = totalRows + 1;
+			}
+		}
+	}
+	if (totalRows < Number(numRows)) {
+		document.getElementById(tableid).rows[totalRows+2].style.display = '';
+
+		if (document.getElementById(document.getElementById(tableid).rows[totalRows+2].id+ ".isHidden")) {
+			document.getElementById(document.getElementById(tableid).rows[totalRows+2].id+ ".isHidden").value = 0;
+		}
+
+	} else {
+		alert("No more rows can be added");
+	}	
+	
+}
+
+function deleteRow(tableid, rowId, numRows) {
+	var totalRws = document.getElementById(tableid).rows.length;
+	var totalRows = 0;
+	for(var i=0; i< totalRws; i++){		
+		var rowObj = document.getElementById(tableid).rows[i];
+		if(rowObj.id){
+			if(document.getElementById(rowObj.id + ".isHidden").value == 0){
+				totalRows = totalRows + 1;
+			}
+		}
+	}
+	if (totalRows > 1) {
+		document.getElementById(tableid).rows[totalRows+1].style.display = 'none';
+		if (document.getElementById(document.getElementById(tableid).rows[totalRows+1].id+ ".isHidden")) {
+			document.getElementById(document.getElementById(tableid).rows[totalRows+1].id+ ".isHidden").value = 1;
+		}
+
+		var noOfCols = document.getElementById(tableid).rows[totalRows + 1].cells.length;
+		for (var colNo = 1; colNo < noOfCols; colNo++) { 
+			document.getElementById(tableid).rows[totalRows+1].cells[colNo].childNodes[0].value = '';
+			var errorSpanId = document.getElementById(tableid).rows[totalRows+1].cells[colNo].childNodes[0].id + 'Err';
+			document.getElementById(errorSpanId).style.display = 'none';
+			document.getElementById(errorSpanId).innerHTML = '';
+		}
+	} else {
+		alert("No more rows to delete");
+	}
+}
+var countdown = 30; // Initial countdown value in seconds
+var countdownInterval;
+
+function resendOTP() {
+	$.ajax({
+		type: "GET",
+		url: "otpForConfirmation",
+		success: function(response){
+			alert(message);
+		}
+});
+
+// Disable the button
+disableResendButton();
+
+// Stop the previous countdown interval (if any)
+clearInterval(countdownInterval);
+
+// Reset the countdown to its initial value
+countdown = 30;
+document.getElementById('timerText').style.display = 'block';
+// Start the countdown timer
+startCountdown();
+}
+
+function disableResendButton() {
+var resendButton = document.getElementById('resendOTPBtn');
+resendButton.disabled = true;
+}
+
+function enableResendButton() {
+	document.getElementById('timerText').style.display = 'none';
+var resendButton = document.getElementById('resendOTPBtn');
+resendButton.disabled = false;
+
+// Remove the timer display
+var timerText = document.getElementById('timerText');
+timerText.textContent = '';
+}
+
+function startCountdown() {
+// Update the timer every second
+countdownInterval = setInterval(function() {
+  countdown--;
+
+  // Update the timer text
+  updateTimerText();
+
+  // If the countdown reaches 0, stop the interval
+  if (countdown <= 0) {
+	clearInterval(countdownInterval);
+	enableResendButton();
+  }
+}, 1000);
+}
+
+function updateTimerText() {
+var timerText = document.getElementById('timerText');
+timerText.textContent = 'Resend OTP after ' + countdown + ' seconds';
+}
+
+function submitOTP() {
+	var val = document.getElementById('otpValue').value;
+	if(val=="") {
+		document.getElementById('otpReq').style.display = 'block'
+		document.getElementById('otpReq').innerHTML = "Otp is mandatory";
+	} else {
+		document.getElementById('otpForConfirmation').value=val;
+		document.getElementById('confirmationScreen').action="confirmUserApplication"; 	
+		document.getElementById('confirmationScreen').submit();
+		
+	}
+}
+
+function openModelForError(error){
+	if(error!=""){
+		$('#otpModal').modal('show');
+		document.getElementById('otpReq').style.display = 'block'
+		document.getElementById('otpReq').innerHTML = error;
+	}
+}
+
+function sendOtpAjax(val){
+	$.ajax({
+		type: "GET",
+		url: "checkOtpForConfirmation",
+		data: { otpForConfirmation: val},
+		success: function(response){
+			if(response!="success"){
+				document.getElementById('otpReq').style.display = 'block'
+				document.getElementById('otpReq').innerHTML = response;
+			}else{
+				$('#otpModal').modal('hide');
+				document.getElementById('confirmationScreen').action="confirmUserApplication"; 	
+				document.getElementById('confirmationScreen').submit();
+			}
+		}
+});
+}
+
+jQuery(function($) {
+
+	
+	$('[data-rel=tooltip]').tooltip();
+
+	$('.select2').css('width', '200px').select2({
+		allowClear : true
+	}).on('change', function() {
+		$(this).closest('form').validate().element($(this));
+	});
+	
+	var validation = false;
+	$('#fuelux-wizard-container')
+			.ace_wizard({
+				
+			})
+			.on(
+					'actionclicked.fu.wizard',
+					function(e, info) {
+						const button = document.getElementById('idProcessButton');
+						if (info.step == 1) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+							
+							var elements = [ 'maritalStatusValidate'];
+							var errors = [ 'maritalStatusValidateErr'];
+							var msg = [ 'Marital Status'];
+							
+
+							
+							eleLength = elements.length;
+							
+							for (i = 0; i < eleLength; i++) {
+								if (document.getElementById(elements[i]).value == "" || document.getElementById(elements[i]).value =="0") {
+									var error = elements[i];
+									$("#" + error).focus();
+									document.getElementById(errors[i]).innerHTML = "Please enter/select "
+											+ msg[i];
+									document.getElementById(errors[i]).style.display = "Block";
+									e.preventDefault();
+									validation=validation+1;
+								}else{
+									document.getElementById(errors[i]).style.display = " ";
+									if(elements[i]=='maritalStatusValidate' && document.getElementById(elements[i]).value=='Widow'){
+										var docElements=['maritalStatusValidate'];
+										var docErrors=['widowInputFileErr'];
+										
+										docEleLength = docElements.length;
+										for (i = 0; i < docEleLength; i++) {
+											var file = document.getElementById(docElements[i]+"File");
+											if (!file || file.innerHTML.trim()== '') {
+												document.getElementById(docErrors[i]).innerHTML = "Please Attach required document";
+												document.getElementById(docErrors[i]).style.display = "Block";
+												e.preventDefault();
+												validation=validation+1;
+											}else{
+												document.getElementById(docErrors[i]).style.display = " ";
+											}
+										}
+									}
+								}
+							}
+							
+							if(validation==0){
+								button.disabled = true;
+								document.getElementById('personalDetails').action="saveUserPersonalDetails"; 	
+								document.getElementById('personalDetails').submit();
+							}
+						}
+						if (info.step == 2) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+							
+							var docElements=['haryanaDomecile','applicantOrFamilyMemberInGovtJob',
+								'firstOrSecondChildAndFatherDiedBeforeAttaning15Years','nccnssca','belongsToDonefiedTribe','firstOrSecondChildAndFatherDiedBefore42Years',
+								'participationInChampionship'];
+							var docErrors=['domicileInputFileErr','familyInputFileErr',
+								'deathInputFileErr','nccInputFileErr','denotifiedInputFileErr','death42InputFileErr','participationInChampionshipFileErr'];
+							
+							 
+							docEleLength = docElements.length;
+							for (i = 0; i < docEleLength; i++) {
+								var option = document
+								.getElementsByName(docElements[i])
+								
+								if (option[0].checked) {
+									var file = document.getElementById(docElements[i]+"File");
+									if (!file || file.innerHTML.trim()== '') {
+										document.getElementById(docErrors[i]).innerHTML = "Please Attach required document";
+										document.getElementById(docErrors[i]).style.display = "Block";
+										e.preventDefault();
+										validation=validation+1;
+									}else{
+										document.getElementById(docErrors[i]).style.display = " ";
+									}
+								}
+							}
+							 
+							
+							var elements = [ 'categoryValidate'];
+							var errors = [ 'categoryValidateErr'];
+							var msg = [ 'Category'];
+							
+							var radioElements = [ 'haryanaDomecile',
+								'nccnssca','applicantOrFamilyMemberInGovtJob','firstOrSecondChildAndFatherDiedBefore42Years',
+								'firstOrSecondChildAndFatherDiedBeforeAttaning15Years','participationInChampionship'];
+							var radioErrors = [ 'haryanaDomecileValidateErr',
+								'nccnsscaValidateErr','applicantOrFamilyMemberInGovtJobValidateErr',
+								'firstOrSecondChildAndFatherDiedBefore42YearsValidateErr','firstOrSecondChildAndFatherDiedBeforeAttaning15YearsValidateErr',
+								'participationInChampionshipValidateErr'];
+							var radioMsg = [ 'Haryana Domecile',
+								'NCC certificate','Required feild','Required feild','Required feild','Required feild','Required feild'];
+							
+							var radioElements2 = ['exServiceman']; 
+							var radioErrors2 = [ 'exServicemanValidateErr'];
+							var radioMsg2 = ['Ex-Serviceman/ Dependent of Ex-Serviceman'];
+							
+							
+							eleLength = elements.length;
+							radioEleLength = radioElements.length;
+							radioEleLength2 = radioElements2.length;
+							
+							for (i = 0; i < eleLength; i++) {
+								if (document.getElementById(elements[i]).value == "" || document.getElementById(elements[i]).value =="0") {
+									var error = elements[i];
+									$("#" + error).focus();
+									document.getElementById(errors[i]).innerHTML = "Please enter/select "
+											+ msg[i];
+									document.getElementById(errors[i]).style.display = "Block";
+									e.preventDefault();
+									validation=validation+1;
+								}else{
+									document.getElementById(errors[i]).style.display = "";
+									if(elements[i]=="categoryValidate" && document.getElementById(elements[i]).value=="General"){
+										document.getElementById('otherCategory').value="General";
+									}else if(elements[i]=="categoryValidate" && (document.getElementById(elements[i]).value=="BCA" ||
+											document.getElementById(elements[i]).value=="BCB" )){
+										
+										var creamyLayerQues = ['qualifyForNonCreamyLayer'];
+										 var creamyLayerQueserrors = ['qualifyForNonCreamyLayerValidateErr'];
+										 var creamyLayerQuesmsg = ['Checkbox'];
+ 
+										 creamyLayerQuesLength = creamyLayerQues.length;
+										 for (j = 0; j < creamyLayerQuesLength; j++) {
+												var option = document
+														.getElementsByName(creamyLayerQues[j])
+												if (!(option[0].checked || option[1].checked)) {
+													var radioError = creamyLayerQues[j];
+													$("#" + radioError).focus();
+													document.getElementById(creamyLayerQueserrors[j]).innerHTML = "Please select "
+															+ creamyLayerQuesmsg[j];
+													document.getElementById(creamyLayerQueserrors[j]).style.display = "Block";
+													e.preventDefault();
+													validation=validation+1;
+												} else { 
+													document.getElementById(creamyLayerQueserrors[j]).innerHTML = "";
+												}
+											}
+									}
+									if(elements[i]=="categoryValidate" && (document.getElementById(elements[i]).value=="EWS" ||
+											document.getElementById(elements[i]).value=="General") && document
+											.getElementsByName('haryanaDomecile')[0].checked ){
+										var belongsToDonefiedTribe = ['belongsToDonefiedTribe'];
+										 var belongsToDonefiedTribeerrors = ['belongsToDonefiedTribeValidateErr'];
+										 var belongsToDonefiedTribemsg = ['belongsToDonefiedTribe'];
+
+										 belongsToDonefiedLength = belongsToDonefiedTribe.length;
+										 for (k = 0; k < belongsToDonefiedLength; k++) {
+												var option = document
+														.getElementsByName(belongsToDonefiedTribe[k])
+												if (!(option[0].checked || option[1].checked)) {
+													var radioError = belongsToDonefiedTribe[k];
+													$("#" + radioError).focus();
+													document.getElementById(belongsToDonefiedTribeerrors[k]).innerHTML = "Please select "
+															+ belongsToDonefiedTribemsg[k];
+													document.getElementById(belongsToDonefiedTribeerrors[k]).style.display = "Block";
+													e.preventDefault();
+													validation=validation+1;
+												} else { 
+													document.getElementById(belongsToDonefiedTribeerrors[k]).innerHTML = "";
+												}
+											}
+									}
+									if(elements[i]=="categoryValidate" && 
+											document.getElementById(elements[i]).value!="General"){
+										
+										var file = document.getElementById(elements[i]+"File");
+										if (!file || file.innerHTML.trim()== '') {
+											$("#categoryInputFileErr").focus();
+											document.getElementById('categoryInputFileErr').innerHTML = "Please Attach required document";
+											document.getElementById('categoryInputFileErr').style.display = "Block";
+											e.preventDefault();
+											validation=validation+1;
+										}else{
+											document.getElementById('categoryInputFileErr').style.display = " ";
+										}
+									}
+									document.getElementById(errors[i]).style.display = " ";
+								}
+							}
+							
+							for (i = 0; i < radioEleLength; i++) {
+								var option = document
+										.getElementsByName(radioElements[i])
+								 
+								if (!(option[0].checked || option[1].checked)) {
+									var radioError = radioElements[i];
+									$("#" + radioError).focus();
+									document.getElementById(radioErrors[i]).innerHTML = "Please select "
+											+ radioMsg[i];
+									document.getElementById(radioErrors[i]).style.display = "Block";
+									e.preventDefault();
+									validation=validation+1;
+								} else {
+									document.getElementById(radioErrors[i]).innerHTML = "";
+									if(radioElements[i]=='participationInChampionship' && option[0].checked){
+										var elementsN = ['championshipTypeValidate','medalValidate'];
+										var errorsN = ['championshipTypeValidateErr','medalValidateErr'];
+										var msgN = ['Championship','Medal'];
+										
+										eleLengthN = elementsN.length;
+										for (k = 0; k < eleLengthN; k++) {
+											if (document.getElementById(elementsN[k]).value == "" || document.getElementById(elementsN[k]).value =="0") {
+												var error = elementsN[k];
+												$("#" + error).focus();
+												document.getElementById(errorsN[k]).innerHTML = "Please enter/select "
+														+ msgN[k]; 
+												document.getElementById(errorsN[k]).style.display = "Block";
+												e.preventDefault();
+												validation=validation+1;
+											}else{
+												document.getElementById(errorsN[k]).style.display = "";
+											}
+										}
+									}
+								}
+							}
+							
+							for (i = 0; i < radioEleLength2; i++) {
+								var option = document
+										.getElementsByName(radioElements2[i])
+								 
+								if (!(option[0].checked || option[1].checked)) { 
+									var radioError = radioElements2[i];
+									$("#" + radioError).focus();
+									document.getElementById(radioErrors2[i]).innerHTML = "Please select "
+											+ radioMsg2[i];
+									document.getElementById(radioErrors2[i]).style.display = "Block";
+									e.preventDefault();
+									validation=validation+1;
+								} else {
+									document.getElementById(radioErrors2[i]).innerHTML = "";
+								if (option[0].checked) {	 
+									var elements3 = ['idArmedForceCatValidate'];
+									var errors3 = ['idArmedForceCatValidateErr'];
+									var msg3 = ['ESM Type'];
+									
+									eleLength3 = elements3.length;
+									
+									for (i = 0; i < eleLength3; i++) {
+										if (document.getElementById(elements3[i]).value == "" 
+												|| document.getElementById(elements3[i]).value =="0") {
+											var error = elements3[i];
+											$("#" + error).focus();
+											document.getElementById(errors3[i]).innerHTML = "Please enter/select "
+													+ msg3[i];
+											document.getElementById(errors3[i]).style.display = "Block";
+											e.preventDefault();
+											validation=validation+1;
+										}else{
+											document.getElementById(errors3[i]).style.display = " ";
+											if(elements3[i]=='idArmedForceCatValidate'){
+												 var obj = document.getElementById(elements3[i]);
+												 var selectedOption = obj.options[obj.selectedIndex];
+												 var selectedInfo = selectedOption.getAttribute("data-info");
+												 if(selectedInfo=='PR1' || selectedInfo=='PR3'){
+													 
+													 var elements5 = [ 'dateOfDischargeValidate','dateOfJoiningValidate'];
+													 var errors5 = [ 'dateOfDischargeValidateErr','dateOfJoiningValidateErr'];
+													 var msg5 = [ 'Date of Discharge','Date of Entry'];
+													 
+													 eleLength5 = elements5.length;
+													 
+													 for (m = 0; m < eleLength5; m++) {
+															if (document.getElementById(elements5[m]).value == "" || document.getElementById(elements5[m]).value =="0") {
+																var error = elements5[m];
+																$("#" + error).focus();
+																document.getElementById(errors5[m]).innerHTML = "Please enter/select "
+																		+ msg5[m];
+																document.getElementById(errors5[m]).style.display = "Block";
+																e.preventDefault();
+																validation=validation+1;
+															}else{
+																document.getElementById(errors5[m]).style.display = " ";
+															} 
+														}
+													 var esmDocPR13Element=['exServicemanIdCardFile','exServicemanDischargeFile'];
+													 var esmDocPR13Error=['esmIdCardInputFileErr','esmDischargeInputFileErr'];
+													 
+													 esmDocPR13EleLength = esmDocPR13Element.length;
+														for (n = 0; n < esmDocPR13EleLength; n++) {
+															var file = document.getElementById(esmDocPR13Element[n]);
+															if (!file || file.innerHTML.trim()== '') {
+																document.getElementById(esmDocPR13Error[n]).innerHTML = "Please Attach required document";
+																document.getElementById(esmDocPR13Error[n]).style.display = "Block";
+																e.preventDefault();
+																validation=validation+1;
+															}else{
+																document.getElementById(esmDocPR13Error[n]).style.display = " ";
+															}
+														}
+														
+														startDateString=document.getElementById('dateOfJoiningValidate').value;
+														endDateString=document.getElementById('dateOfDischargeValidate').value;
+														
+														var components = startDateString.split("-");
+														var startday = parseInt(components[0]);
+														var startmonth = monthMap[components[1]];
+														var startyear = parseInt(components[2]);
+														
+														var startDate = new Date(startyear, startmonth, startday);
+														
+														var components = endDateString.split("-");
+														var endday = parseInt(components[0]);
+														var endmonth = monthMap[components[1]];
+														var endyear = parseInt(components[2]);
+														
+														var endDate = new Date(endyear, endmonth, endday);
+														
+														if (!isEndDateGreaterThanStartDate(startDate, endDate)) {
+															document.getElementById('dateOfDischargeValidateErr').innerHTML = "Discharge date should be greater than entry date";
+															document.getElementById('dateOfDischargeValidateErr').style.display = "block";
+															$("#dateOfDischargeValidate").focus();
+															validation=validation+1;
+														} else {
+															document.getElementById('dateOfDischargeValidateErr').style.display = "none";
+														}
+													 
+												 }else if(selectedInfo=='PR2' || selectedInfo=='PR4'){
+													    var file = document.getElementById('exServicemanEligibilityFile');
+														if (!file || file.innerHTML.trim()== '') {
+															$("#exServicemanEligibilityFile").focus();
+															document.getElementById('esmEligibilityInputFileErr').innerHTML = "Please Attach required document";
+															document.getElementById('esmEligibilityInputFileErr').style.display = "Block";
+															e.preventDefault();
+															validation=validation+1;
+														}else{
+															document.getElementById('esmEligibilityInputFileErr').style.display = " ";
+														}
+														
+														if(selectedInfo=='PR2'){
+															if (document.getElementById('disabilityPercentageValidate').value == "" || 
+																	 document.getElementById('disabilityPercentageValidate').value =="0") {
+																	var error = 'disabilityPercentageValidate';
+																	$("#" + error).focus();
+																	document.getElementById('disabilityPercentageValidateErr').innerHTML = "Please enter/select Disablity Percentage";
+																	document.getElementById('disabilityPercentageValidateErr').style.display = "Block";
+																	e.preventDefault();
+																	validation=validation+1;
+																}else{
+																	document.getElementById('disabilityPercentageValidateErr').style.display = " ";
+																}
+														}
+												 }
+												 else{
+													 var file = document.getElementById('exServicemanFile');
+														if (!file || file.innerHTML.trim()== '') {
+															$("#exServicemanFile").focus();
+															document.getElementById('esmInputFileErr').innerHTML = "Please Attach required document";
+															document.getElementById('esmInputFileErr').style.display = "Block";
+															e.preventDefault();
+															validation=validation+1;
+														}else{
+															document.getElementById('esmInputFileErr').style.display = " ";
+														}
+												 }
+											}
+										}
+									}
+								  }
+								}
+						     }
+							
+							
+							var nccOption = document
+							.getElementsByName('nccnssca')
+							
+							if(nccOption[0].checked){
+								var elements4 = ['nccLevelValidate'];
+								var errors4 = ['nccLevelValidateErr'];
+								var msg4 = ['NCC Level'];
+								
+								eleLength4 = elements4.length;
+								
+								for (i = 0; i < eleLength4; i++) {
+									if (document.getElementById(elements4[i]).value == "" || document.getElementById(elements4[i]).value =="0") {
+										var error = elements4[i];
+										$("#" + error).focus();
+										document.getElementById(errors4[i]).innerHTML = "Please enter/select "
+												+ msg4[i];
+										document.getElementById(errors4[i]).style.display = "Block";
+										e.preventDefault();
+										validation=validation+1;
+									}else{
+										document.getElementById(errors4[i]).style.display = " ";
+									}
+								}
+							}
+							
+							if(validation==0){
+									button.disabled = true;
+									document.getElementById('registrationDetails').action="saveUserRegistrationDetails"; 	
+									document.getElementById('registrationDetails').submit();
+							}
+
+						}
+						if (info.step == 3) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+
+							var elements = [ 'mailingAddressValidate',
+									'cityValidate', 'stateValidate','districtValidate',
+									'pincodeValidate'];
+
+							var errors = [ 'mailingAddressValidateErr',
+									'cityValidateErr', 'stateValidateErr','districtValidateErr',
+									'pincodeValidateErr'];
+
+							var msg = [ 'Mailing Address', 'City',
+									'State','district', 'Pincode'];
+							
+							eleLength = elements.length;
+							
+							for (i = 0; i < eleLength; i++) {
+								if (document.getElementById(elements[i]).value == "" || document.getElementById(elements[i]).value =="0") {
+									var error = elements[i];
+									$("#" + error).focus();
+									document.getElementById(errors[i]).innerHTML = "Please enter/select "
+											+ msg[i];
+									document.getElementById(errors[i]).style.display = "Block";
+									e.preventDefault();
+									validation=validation+1;
+								} else{
+									document.getElementById(errors[i]).innerHTML = "";
+								}
+
+							}
+							
+							if(document.getElementById('isSameAsPermanent1').checked==false){
+								var elements2 = [ 'correspondenceMailingAddressValidate',
+									'correspondenceCityValidate', 'correspondenceStateValidate','correspondenceDistrictValidate',
+									'correspondencePincodeValidate'];
+
+								var errors2 = [ 'correspondenceMailingAddressValidateErr',
+										'correspondenceCityValidateErr', 'correspondenceStateValidateErr','correspondenceDistrictValidateErr',
+										'correspondencePincodeValidateErr'];
+	
+								var msg2 = [ 'Mailing Address', 'City',
+										'State','district', 'Pincode'];
+								
+								eleLength2 = elements.length;
+								
+								for (i = 0; i < eleLength2; i++) {
+									if (document.getElementById(elements2[i]).value == "" || document.getElementById(elements2[i]).value =="0") {
+										var error = elements2[i];
+										$("#" + error).focus();
+										document.getElementById(errors2[i]).innerHTML = "Please enter/select "
+												+ msg2[i];
+										document.getElementById(errors2[i]).style.display = "Block";
+										e.preventDefault();
+										validation=validation+1;
+									} else{
+										document.getElementById(errors2[i]).innerHTML = "";
+									}
+	
+								}
+							}
+							
+							
+							
+							if(validation==0){
+								button.disabled = true;
+								   document.getElementById('addressDetails').action="saveUserMailingAddress"; 	
+								   document.getElementById('addressDetails').submit();
+								  
+
+							}
+						}
+						if (info.step == 4) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+							
+							var numOfVisibleRows = $('#qualificationBody tr:visible').length;
+							 
+							for (i = 0; i < numOfVisibleRows; i++) {
+								var elements = [ 'qualificationMaster' + [i],'subject' + [i],'certifyingAuthority' + [i],'rollNo' + [i],'certificateNo' + [i],'passingYear' + 
+									[i],'marksObtained' + [i],'maxMarks' + [i],'dateOfResult' + [i], 'qualificationDoc' + [i]];
+								var errors = ['qualificationMaster' + [i] + 'Err','subject' + [i] + 'Err','certifyingAuthority' + [i] + 'Err','rollNo' + [i] + 'Err','certificateNo' + [i] + 
+									'Err','passingYear' + [i] + 'Err','marksObtained' + [i] + 'Err','maxMarks' + [i] + 'Err','dateOfResult' + [i] + 'Err', 
+									'qualificationDoc'+ [i] + 'Err'];
+								var msg = ['Qualification','Subject','Certifying Authority','Roll no','Certificate No','Passing Year','Marks Obtained',
+									'Maximum Marks','Date of Result'];
+								
+								var eleLenth = elements.length;
+								for (j = 0; j < eleLenth; j++) {
+									if(!elements[j].includes('qualificationDoc')){
+										if (document.getElementById(elements[j]).value == null || document.getElementById(elements[j]).value == "" || document.getElementById(elements[j]).value == 0) {
+											document.getElementById(errors[j]).innerHTML = "Please select/enter " + msg[j];
+											document.getElementById(errors[j]).style.display = "block";
+											validation = validation + 1;
+										} else {
+											document.getElementById(errors[j]).style.display = "";
+										}
+									}else{
+										var file = document.getElementById(elements[j]+"File");
+										if (!file || file.innerHTML.trim()== '') {
+											var selectedFile = document.getElementsByClassName(elements[j]);
+											var fileObj = selectedFile[0];
+											
+											if(fileObj.value!=""){
+												var ext = fileObj.value.split('.').pop();
+												if(ext.toLowerCase()!="pdf" && ext.toLowerCase()!="jpg" && ext.toLowerCase()!="jpeg" && ext.toLowerCase()!="png"){
+													 $("#" + errors[j]).focus();
+														document.getElementById(errors[j]).innerHTML = "Please upload the file in .pdf,.jpg,.jpeg,.png format Only.";
+														document.getElementById(errors[j]).style.display = "Block";
+														validation=validation+1;
+													  
+												  }else if(fileObj.files[0].size > 512000){
+													  $("#" + errors[j]).focus();
+														document.getElementById(errors[j]).innerHTML = "Maximum file size to be uploaded should not be greater than 500 KB";
+														document.getElementById(errors[j]).style.display = "Block";
+														validation=validation+1;
+												  }
+											}else{
+												document.getElementById(errors[j]).innerHTML = "Please Attach required document";
+												document.getElementById(errors[j]).style.display = "Block";
+												e.preventDefault();
+												validation=validation+1;
+											}
+										}else{
+											document.getElementById(errors[j]).style.display = " ";
+										}
+									}
+									
+								} 
+							}
+							
+							if(validation==0){
+								button.disabled = true;
+								   document.getElementById('qualificationDetails').action="saveUserQualificationDetails"; 	
+								   document.getElementById('qualificationDetails').submit();
+							}
+						}
+						
+						if (info.step == 5) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+							
+							if(document.getElementById("isExperienceRequired").value=='Y'){ 
+							var experienceOption=document
+								.getElementsByName('experienced')
+								
+								if(!(experienceOption[0].checked || experienceOption[1].checked)){
+									document.getElementById('experiencedValidateErr').innerHTML = "Please select declaration ";
+									document.getElementById('experiencedValidateErr').style.display = "block";
+									validation = validation + 1;
+								}else if(experienceOption[0].checked){
+									
+									var numOfVisibleRows = $('#experienceBody tr:visible').length;
+
+									for (i = 0; i < numOfVisibleRows; i++) {
+										var elements = [ 'officeName' + [i],'industryType' + [i],'designation' + [i],'startDate' + [i],'endDate' + [i],'sector' + [i],
+											'experienceDoc'+ [i],'nameOfIssuingAuthority'+ [i],'dateOfIssue'+ [i],'referenceNo'+ [i]];
+										var errors = ['officeName' + [i] + 'Err','industryType' + [i] + 'Err','designation' + [i] + 'Err','startDate' + [i] + 'Err',
+											'endDate' + [i] + 'Err','sector' + [i] + 'Err','experienceDoc'+ [i] + 'Err','nameOfIssuingAuthority'+ [i] + 'Err','dateOfIssue'+ [i] + 'Err','referenceNo'+ [i] + 'Err'];
+										var msg = ['Office Name','Industry Type','Designation','Start Date','End Date', 'Sector','Name of Issuing Authority','Date of Issue','Reference Number'];
+										
+										var eleLenth = elements.length; 
+										
+										
+										for (j = 0; j < eleLenth; j++) {
+											if(!elements[j].includes('experienceDoc')){	
+												if (document.getElementById(elements[j]).value == null || document.getElementById(elements[j]).value == "" || document.getElementById(elements[j]).value == 0) {
+													document.getElementById(errors[j]).innerHTML = "Please select/enter " + msg[j];
+													document.getElementById(errors[j]).style.display = "block";
+													validation = validation + 1;
+												} else {
+													document.getElementById(errors[j]).style.display = "";
+												}
+												
+												if(elements[j].includes('endDate')){
+													startDateString=document.getElementById('startDate'+[i]).value;
+													endDateString=document.getElementById(elements[j]).value;
+													
+													var components = startDateString.split("-");
+													var startday = parseInt(components[0]);
+													var startmonth = monthMap[components[1]];
+													var startyear = parseInt(components[2]);
+													
+													var startDate = new Date(startyear, startmonth, startday);
+													
+													var components = endDateString.split("-");
+													var endday = parseInt(components[0]);
+													var endmonth = monthMap[components[1]];
+													var endyear = parseInt(components[2]);
+													
+													var endDate = new Date(endyear, endmonth, endday);
+													
+													 
+													if (!isEndDateGreaterThanStartDate(startDate, endDate)) {
+														document.getElementById(errors[j]).innerHTML = "Employment end date should be greater than employment start date";
+														document.getElementById(errors[j]).style.display = "block";
+														validation = validation + 1; 
+													}else{
+														document.getElementById(errors[j]).style.display = "none";
+													}
+												}
+												
+											}else{
+												var file = document.getElementById(elements[j]+"File");
+												if (!file || file.innerHTML.trim()== '') {
+													var selectedFile = document.getElementsByClassName(elements[j]);
+													var fileObj = selectedFile[0];
+													
+													if(fileObj.value!=""){
+														var ext = fileObj.value.split('.').pop();
+														if(ext.toLowerCase()!="pdf" && ext.toLowerCase()!="jpg" && ext.toLowerCase()!="jpeg" && ext.toLowerCase()!="png"){
+															 $("#" + errors[j]).focus();
+																document.getElementById(errors[j]).innerHTML = "Please upload the file in .pdf,.jpg,.jpeg,.png format Only.";
+																document.getElementById(errors[j]).style.display = "Block";
+																validation=validation+1;
+															  
+														  }else if(fileObj.files[0].size > 512000){
+															  $("#" + errors[j]).focus();
+																document.getElementById(errors[j]).innerHTML = "Maximum file size to be uploaded should not be greater than 500 KB";
+																document.getElementById(errors[j]).style.display = "Block";
+																validation=validation+1;
+														  }
+													}else{
+														document.getElementById(errors[j]).innerHTML = "Please Attach required document";
+														document.getElementById(errors[j]).style.display = "Block";
+														e.preventDefault();
+														validation=validation+1;
+													}
+												}else{
+													document.getElementById(errors[j]).style.display = " ";
+												}
+											}	
+										} 
+									}
+								}else{
+									document.getElementById('experiencedValidateErr').style.display = " ";
+								}
+							}else{
+								var validation=0;
+							}
+							
+							if(validation==0){
+								button.disabled = true;
+								   document.getElementById('experienceDetails').action="saveUserExperienceDetails"; 	
+								   document.getElementById('experienceDetails').submit();
+							}
+						}
+						/*if (info.step == 6) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+							
+							var docElements=['passedHindiSanskritMatriculation'];
+							var docErrors=['hindiInputFileErr'];
+							
+							
+							docEleLength = docElements.length;
+							for (i = 0; i < docEleLength; i++) {
+								var option = document
+								.getElementsByName(docElements[i])
+								
+								if (option[0].checked) {
+									var file = document.getElementById(docElements[i]+"File");
+									if (!file || file.innerHTML.trim()== '') {
+										document.getElementById(docErrors[i]).innerHTML = "Please Attach required document";
+										document.getElementById(docErrors[i]).style.display = "Block";
+										e.preventDefault();
+										validation=validation+1;
+									}else{
+										document.getElementById(docErrors[i]).style.display = " ";
+									}
+								}
+								
+							}
+							
+							
+							var radioElements = ['passedHindiSanskritMatriculation','convictedToCriminalCourt','emloyedInGovtPvtSector',
+												 'disciplinaryProceedings','bondWithStateGovt'];
+							var radioErrors = ['passedHindiSanskritMatriculationValidateErr','convictedToCriminalCourtValidateErr',
+								               'emloyedInGovtPvtSectorValidateErr','disciplinaryProceedingsValidateErr','bondWithStateGovtValidateErr'];
+							
+							
+							radioEleLength = radioElements.length;
+							
+							
+							for (i = 0; i < radioEleLength; i++) {
+								var option = document
+										.getElementsByName(radioElements[i])
+								if (!(option[0].checked || option[1].checked)) {
+									var radioError = radioElements[i];
+									$("#" + radioError).focus();
+									document.getElementById(radioErrors[i]).innerHTML = "Please select requested feild";
+									document.getElementById(radioErrors[i]).style.display = "Block";
+									e.preventDefault();
+									validation=validation+1;
+								} else {
+									document.getElementById(radioErrors[i]).innerHTML = "";
+								}
+							}
+							
+							if(validation==0){
+								   document.getElementById('otherDetails').action="saveUserOtherDetails"; 	
+								   document.getElementById('otherDetails').submit();
+							}
+						}*/
+						if (info.step == 6) {
+							button.disabled = true;
+							document.getElementById('socialEconomicDetails').action="saveSocialEconomicDetails"; 	
+							document.getElementById('socialEconomicDetails').submit();
+						}
+						if (info.step == 7) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+							
+							var elements = [ 'image0',
+								'image1'];
+
+							var errors = [ 'image0Err',
+									'image1Err'];
+	
+							var msg = [ 'Photograph', 'Signature'];
+							
+							
+							eleLength = elements.length;
+							
+							for (i = 0; i < eleLength; i++) {
+								if (document.getElementById(elements[i]).value == "" || document.getElementById(elements[i]).value =="0") {
+									var error = elements[i];
+									$("#" + error).focus();
+									document.getElementById(errors[i]).innerHTML = "Please upload and Preview the images first ";
+									document.getElementById(errors[i]).style.display = "Block";
+									e.preventDefault();
+									validation=validation+1;
+								} else{
+									document.getElementById(errors[i]).innerHTML = "";
+								}
+
+							}
+							
+							if(validation==0){
+								button.disabled = true;
+								   document.getElementById('uploadPhotoSign').action="uploadUserPhotoSign"; 	
+								   document.getElementById('uploadPhotoSign').submit();
+							}
+                        }
+						
+						if (info.step == 8) {
+							e.isDefaultPrevented = true;
+							var validation=0;
+							
+							if(validation==0){
+								button.disabled = true;
+								document.getElementById('uploadDocuments').action="saveUserDocumentDetails"; 	
+								document.getElementById('uploadDocuments').submit();
+							}
+						}
+						
+						if (info.step == 9) {
+							e.isDefaultPrevented = true;
+							var element=document.getElementById('confirmation').checked;
+							var file = document.getElementById('signedConfirmationFile');
+							if (!file || file.innerHTML.trim()== '') {
+								document.getElementById('confirmationErrorBox').style.display="block"; 
+								document.getElementById('idConfirmationMessage').innerHTML = "<b>Please take the print using print button placed " +
+										"above and then upload the signed confirmation</b>";
+								document.getElementById('showP').style.display="block"; 
+								e.preventDefault();
+								return false;
+							}else if(element==false){
+								$("#confirmationValidateErr").focus();
+								document.getElementById('confirmationErrorBox').style.display="block"; 
+								document.getElementById('idConfirmationMessage').innerHTML = "<b>Click on the checkbox for declaration and then click " +
+										"on the button Save and Proceed</b>";
+								document.getElementById('showP').style.display="block"; 
+								e.preventDefault();
+								return false;
+							}else{
+								$('#otpModal').modal('show');
+								$.ajax({
+									type: "GET",
+									url: "otpForConfirmation",
+									success: function(response){
+										alert(message);
+									}
+							});
+								
+								  /*document.getElementById('confirmationScreen').action="confirmUserApplication"; 	
+								  document.getElementById('confirmationScreen').submit();*/
+							}
+						}
+			  })
+	.on(
+			'finished.fu.wizard',
+			function(e) {
+				document.getElementById('onBoardingDocs').action="validateFinalUploadScreen"; 	
+			    document.getElementById('onBoardingDocs').submit();
+			    e.isDefaultPrevented = true;
+			}).on('stepclick.fu.wizard', function(e,info) {
+				//e.isDefaultPrevented = true;
+		// e.preventDefault();//this will prevent clicking and selecting
+		// steps
+	}).on('change.fu.wizard', function(e,info) {
+		e.preventDefault(); }).on('stepclicked.fu.wizard', function(e,info) {e.isDefaultPrevented = true; });
+
+$('#modal-wizard-container').ace_wizard();
+$('#modal-wizard .wizard-actions .btn[data-dismiss=modal]').removeAttr(
+	'disabled');
+
+$(document).one('ajaxloadstart.page', function(e) {
+// in ajax mode, remove remaining elements before leaving page
+$('[class*=select2]').remove();
+
+});
+
+if (!ace.vars['touch']) {
+$('.chosen-select').chosen({
+	allow_single_deselect : true
+});
+// resize the chosen on window resize
+
+$(window).off('resize.chosen').on('resize.chosen', function() {
+	$('.chosen-select').each(function() {
+		var $this = $(this);
+		$this.next().css({
+			'width' : $this.parent().width()
+		});
+	})
+}).trigger('resize.chosen');
+// resize chosen on sidebar collapse/expand
+$(document).on('settings.ace.chosen',
+		function(e, event_name, event_val) {
+			if (event_name != 'sidebar_collapsed')
+				return;
+			$('.chosen-select').each(function() {
+				var $this = $(this);
+				$this.next().css({
+					'width' : $this.parent().width()
+				});
+			})
+		});
+
+$('#chosen-multiple-style .btn').on('click', function(e) {
+	var target = $(this).find('input[type=radio]');
+	var which = parseInt(target.val());
+	if (which == 2)
+		$('#form-field-select-4').addClass('tag-input-style');
+	else
+		$('#form-field-select-4').removeClass('tag-input-style');
+});
+}
+
+$('#id-input-file-1 , #id-input-file-2').ace_file_input({
+no_file : 'No File ...',
+btn_choose : 'Choose',
+btn_change : 'Change',
+droppable : false,
+onchange : null,
+thumbnail : false
+});
+
+	
+})
+
+function validateArmedForceCategory(obj){
+	var selectedOption = obj.options[obj.selectedIndex];
+    var selectedInfo = selectedOption.getAttribute("data-info");
+    if(selectedInfo=='PR1' || selectedInfo=='PR3'){
+    	document.getElementById('idDateOfDischarge').style.display="table-row";
+    	document.getElementById('idDateOfEntry').style.display="table-row";
+    	document.getElementById('idEsmIdCardDoc').style.display="table-row";
+    	document.getElementById('idEsmDischargeDoc').style.display="table-row";
+    }else{
+    	document.getElementById('idDateOfDischarge').style.display="none";
+    	document.getElementById('idDateOfEntry').style.display="none";
+    	
+    	document.getElementById('dateOfDischargeValidate').value=""; 
+    	document.getElementById('dateOfJoiningValidate').value=""; 
+    	
+    	document.getElementById('idEsmIdCardDoc').style.display="none";
+    	document.getElementById('idEsmDischargeDoc').style.display="none";
+    	
+    	document.getElementById('yearsCalculate').innerHTML ="";
+	    document.getElementById('monthCalculate').innerHTML ="";
+	    document.getElementById('idServiceYears').style.display = "none";
+    	
+    }
+    
+    if(selectedInfo=='PR2' || selectedInfo=='PR4'){
+    	document.getElementById('idEsmEligibilityDoc').style.display="table-row";
+    }else{
+    	document.getElementById('idEsmEligibilityDoc').style.display="none";
+    }
+    
+    if(selectedInfo=='PR2'){
+    	document.getElementById('idDisabilityPercentage').style.display="table-row";
+    }else{
+    	document.getElementById('idDisabilityPercentage').style.display="none";
+    	document.getElementById('disabilityPercentageValidate').value=""; 
+    }
+    
+    if(selectedInfo=='PR5'){
+    	document.getElementById('idEsmDoc').style.display="table-row";
+    }else{
+    	document.getElementById('idEsmDoc').style.display="none";
+    }
+}
+
+function validateFF(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idFFdoc').style.display="table-row";
+	}else{
+		document.getElementById('idFFdoc').style.display="none";
+	}
+}
+
+function validateApplicantOrFamilyMemberInGovtJob(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idUndertakingdoc').style.display="table-row";
+	}else{
+		document.getElementById('idUndertakingdoc').style.display="none";
+	}
+}
+
+function validateESP(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idESPDoc').style.display="table-row";
+	}else{
+		document.getElementById('idESPDoc').style.display="none";
+	}
+}
+
+function validateExperience(obj){
+	if(obj.value=='Y'){
+		document.getElementById('experienceTable').style.display="block";
+	}else{
+		document.getElementById('experienceTable').style.display="none";
+	}
+}
+
+function validateMaritalStatus(obj){
+	if(obj.value=="" || obj.value!=='Widow'){
+		document.getElementById('idMaritalStatusDoc').style.display="none";
+	}else{
+		document.getElementById('idMaritalStatusDoc').style.display="table-row";
+	}
+}
+
+function validateBelongsToDonefiedTribe(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idDenotifiedDoc').style.display="table-row";
+	}else{
+		document.getElementById('idDenotifiedDoc').style.display="none";
+	}
+}
+
+function validateHindiSanskrit(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idHindiDoc').style.display="table-row";
+	}else{
+		document.getElementById('idHindiDoc').style.display="none";
+	}
+}
+
+function validateNCC(obj){ 
+	if(obj.value=='Y'){
+		document.getElementById('idNCCDoc').style.display="table-row";
+		document.getElementById('idNCCLevel').style.display="table-row";
+	}else{
+		document.getElementById('idNCCDoc').style.display="none";
+		document.getElementById('idNCCLevel').style.display="none";
+		
+		var cat=" ";
+		var catForIteration = document.getElementById('nccLevelValidate');
+		for(var i, j = 0; i = catForIteration.options[j]; j++) {
+		    if(i.value == cat) {
+		    	catForIteration.selectedIndex = j;
+		        break;
+		    }
+		}
+	}
+}
+
+function validateParticipation(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idChanmpionshipType').style.display="table-row";
+		document.getElementById('idMedal').style.display="table-row";
+		document.getElementById('idParticipationDoc').style.display="table-row";
+	}else{
+		document.getElementById('idChanmpionshipType').style.display="none";
+		document.getElementById('idMedal').style.display="none";
+		document.getElementById('idParticipationDoc').style.display="none";
+	}
+	
+	var catMedal=" ";
+	var catMedalForIteration = document.getElementById('medalValidate');
+	for(var i, j = 0; i = catMedalForIteration.options[j]; j++) {
+	    if(i.value == catMedal) {
+	    	catMedalForIteration.selectedIndex = j;
+	        break;
+	    }
+	}
+	var cat=" ";
+	var catForIteration = document.getElementById('championshipTypeValidate');
+	for(var i, j = 0; i = catForIteration.options[j]; j++) {
+	    if(i.value == cat) {
+	    	catForIteration.selectedIndex = j;
+	        break;
+	    }
+	}
+	
+}
+
+function validateFatherDeath15Years(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idDeath15YearsDoc').style.display="table-row";
+	}else{
+		document.getElementById('idDeath15YearsDoc').style.display="none";
+	}
+}
+
+function validateFatherDeath42Years(obj){
+	if(obj.value=='Y'){
+		document.getElementById('idDeath42YearsDoc').style.display="table-row";
+	}else{
+		document.getElementById('idDeath42YearsDoc').style.display="none";
+	}
+}
+
+function unfreezePercentage(obj){
+	 var phCat=obj.value;
+		if(phCat=="Y"){
+			 document.getElementById('disPercent').style.display="table-row";
+			 document.getElementById('distype').style.display="table-row";
+			 document.getElementById('idPHdoc').style.display="table-row";
+		}else{
+			document.getElementById('disPercent').style.display="none";
+			document.getElementById('distype').style.display="none";
+			document.getElementById('idPHdoc').style.display="none";
+			document.getElementById('disabilityPercentageValidate').value="";
+		}
+		
+		var cat="0";
+		var catForIteration = document.getElementById('disabilityValidate');
+		for(var i, j = 0; i = catForIteration.options[j]; j++) {
+		    if(i.value == cat) {
+		    	catForIteration.selectedIndex = j;
+		        break;
+		    }
+		}
+}
+
+function unfreezeSeviceYears(obj){
+	if(obj.value!='N'){
+		//document.getElementById('totalService').style.display="table-row";
+		//document.getElementById('idEsmDoc').style.display="table-row";
+		document.getElementById('armedForceCategoryId').style.display="table-row";
+	}else{
+		//document.getElementById('totalService').style.display="none";
+		//document.getElementById('totalServiceYearsValidate').value="";
+		 //document.getElementById('idEsmDoc').style.display="none";
+		 document.getElementById('armedForceCategoryId').style.display="none";
+		 
+		var cat="";
+		var catForIteration = document.getElementById('idArmedForceCatValidate');
+		for(var i, j = 0; i = catForIteration.options[j]; j++) {
+		    if(i.value == cat) {
+		    	catForIteration.selectedIndex = j;
+		        break;
+		    }
+		}
+		
+		var fileRows =['idEsmDoc','idEsmIdCardDoc','idEsmDischargeDoc','idEsmEligibilityDoc'];
+		
+		fileRowsLen=fileRows.length;
+		
+		for (i = 0; i < fileRowsLen; i++) {
+			document.getElementById(fileRows[i]).style.display="none";
+		} 
+		
+		document.getElementById('idDateOfDischarge').style.display="none";
+    	document.getElementById('dateOfDischargeValidate').value="";  
+    	document.getElementById('idDateOfEntry').style.display="none";
+    	document.getElementById('dateOfJoiningValidate').value=""; 
+    	document.getElementById('idDisabilityPercentage').style.display="none";
+    	document.getElementById('disabilityPercentageValidate').value=""; 
+    	
+    	document.getElementById('yearsCalculate').innerHTML ="";
+	    document.getElementById('monthCalculate').innerHTML ="";
+	    document.getElementById('idServiceYears').style.display = "none"; 
+	}
+}
+
+function checkpercentage(obj){
+	if(obj.value>100){
+		document.getElementById('disabilityPercentageValidateErr').innerHTML="Disablility percentage should not be greater than 100";
+		document.getElementById('disabilityPercentageValidateErr').style.display="block";
+		document.getElementById('disabilityPercentageValidate').value="";
+	}else{
+		document.getElementById('disabilityPercentageValidateErr').style.display="none";
+	}
+}
+
+function checkServiceYears(obj){
+	if(obj.value>50){
+		document.getElementById('totalServiceYearsValidateErr').innerHTML="Total Service Years should not be greater than 50";
+		document.getElementById('totalServiceYearsValidateErr').style.display="block";
+		document.getElementById('totalServiceYearsValidate').value="";
+	}else{
+		document.getElementById('totalServiceYearsValidateErr').style.display="none";
+	}
+}
+
+
+function validateMailingAddress(obj) {
+	var errorId = obj.id + "Err";
+	var addressReg = /^[a-zA-Z0-9\s/\-,.]*$/;
+	if (!addressReg.test(obj.value)) {
+		document.getElementById(errorId).innerHTML = "Only .,/- special characters are allowed";
+		document.getElementById(errorId).style.display = "Block";
+		obj.value = '';
+		obj.focus();
+	} else {
+		document.getElementById(errorId).style.display = "none";
+		obj.value = obj.value.trim();
+	}
+}
+
+
+
+function getDistrict(obj,districtId){
+	var cmb = document.getElementById(obj.id).value;
+	var districtValue=0;
+	var districtText="Select district...";
+	
+	 $.ajax({
+			type: "GET",
+			url: "fetchDistrict",
+			data: { stateId: cmb},
+			success: function(response){
+				 var options="";
+				 options += '<option value="' +districtValue+ '">' + districtText+ '</option>';
+				 for(i=0;i<response.length;i++){
+                    options += '<option value="' + response[i].districtId + '">' + response[i].districtName + '</option>';
+					 $("#"+districtId).html(options);
+			}
+			}
+	});
+	 
+
+		var district="0";
+		if(obj.id=="stateValidate"){
+			var districtForIteration = document.getElementById('districtValidate');
+		}else if(obj.id=="correspondenceStateValidate"){
+			var districtForIteration = document.getElementById('correspondenceDistrictValidate');
+		}
+		
+		for(var i, j = 0; i = districtForIteration.options[j]; j++) {
+		    if(i.value == district) {
+		    	districtForIteration.selectedIndex = j;
+		        break;
+		    }
+		}	
+}
+
+
+function getTehsil(obj,tehsilId){
+	var cmb = document.getElementById(obj.id).value;
+	
+	var tehsilValue=0;
+	var tehsilText="Select tehsil...";
+	
+	
+	 $.ajax({
+			type: "GET",
+			url: "fetchTaluka",
+			data: { districtId: cmb},
+			success: function(response){
+				 var options="";
+				 options += '<option value="' +tehsilValue+ '">' + tehsilText+ '</option>';
+				 for(i=0;i<response.length;i++){
+                    options += '<option value="' + response[i].talukaId + '">' + response[i].talukaName + '</option>';
+					 $("#"+tehsilId).html(options);
+			}
+			}
+	});
+	 
+	 
+	    var tehsil="0";
+	    if(obj.id=="districtValidate"){
+	    	var tehsilForIteration = document.getElementById('tehsilValidate');
+		}else if(obj.id=="correspondenceDistrictValidate"){
+			var tehsilForIteration = document.getElementById('correspondenceTehsilValidate');
+		}
+		
+		for(var i, j = 0; i = tehsilForIteration.options[j]; j++) {
+		    if(i.value == tehsil) {
+		    	tehsilForIteration.selectedIndex = j;
+		        break;
+		    }
+		}	
+}
+
+
+function openCorrespondanceBlock(obj){
+	var isCorrespondance = document.getElementById("idCorrespondence");
+	var isCorrespondance1 = document.getElementById("idCorrespondence1");
+	var isCorrespondance2 = document.getElementById("idCorrespondence2");
+	var isCorrespondance3 = document.getElementById("idCorrespondence3");
+	var isCorrespondance4 = document.getElementById("idCorrespondence4");
+	var isCorrespondance5 = document.getElementById("idCorrespondence5");
+	
+	isCorrespondance.style.display = obj.checked ? "none" : "table-row";
+	isCorrespondance1.style.display = obj.checked ? "none" : "table-row";
+	isCorrespondance2.style.display = obj.checked ? "none" : "table-row";
+	isCorrespondance3.style.display = obj.checked ? "none" : "table-row";
+	isCorrespondance4.style.display = obj.checked ? "none" : "table-row";
+	isCorrespondance5.style.display = obj.checked ? "none" : "table-row";
+	
+	if(obj.checked){
+		document.getElementById('isSameAsPermanent').value="Y"
+	}else{
+		document.getElementById('isSameAsPermanent').value=""
+	}
+}
+
+
+$(".myCal").datepicker({
+	showButtonPanel : true,
+	yearRange : "-100Y",
+	changeMonth : true,
+	maxDate : new Date(2024, 4, 30), 
+	changeYear : true,
+	dateFormat : 'dd-M-yy'
+});
+
+
+function previewPhotoSign(){
+	
+	var validation=0;
+	var valid = /\.(jpg|jpeg|png|gif)/i;
+	
+	var elements = [ 'candidateInputFile0',
+		'candidateInputFile1'];
+
+	var errors = [ 'candidateInputFile0Err',
+			'candidateInputFile1Err'];
+	
+	var msg = [ 'Photograph', 'Signature'];
+	
+	eleLength = elements.length;
+	
+	for (i = 0; i < eleLength; i++) {
+		var error = elements[i];
+		var file=document.getElementsByClassName(elements[i]);
+		var fileObj = file[0];
+		
+		if (!fileObj.value == "") {
+		     if(fileObj.value.search(valid) != -1){
+		    	 if(fileObj.files[0].size <= 100000){
+		    		 validation=validation+1;
+		    		
+		    	 }else{
+		    		 $("#" + error).focus();
+						document.getElementById(errors[i]).innerHTML = "File Size should not ne greater than 100 kb";
+						document.getElementById(errors[i]).style.display = "Block";
+		    	 }
+		     }else{
+		    	 $("#" + error).focus();
+					document.getElementById(errors[i]).innerHTML = "Please select jpg/jpeg/png format only";
+					document.getElementById(errors[i]).style.display = "Block";
+					
+		     }	
+		}else{
+			$("#" + error).focus();
+			document.getElementById(errors[i]).innerHTML = "Please select "
+					+ msg[i];
+			document.getElementById(errors[i]).style.display = "Block";
+		}
+	}
+	
+	if(validation==2){
+		document.getElementById('uploadPhotoSign').action="previewUserPhotoSign";
+		document.getElementById('uploadPhotoSign').submit();
+	}
+	
+}
+
+
+
+function getUserPersonalDetails(){
+	document.getElementById('personalDetails').action="getUserPersonalDetails";
+	document.getElementById('personalDetails').submit();
+}
+
+function getUserRegistrationDetails(){
+	document.getElementById('registrationDetails').action="getUserRegistrationDetails";
+	document.getElementById('registrationDetails').submit();
+}
+
+function getUserMailingDetails(){
+	document.getElementById('addressDetails').action="getUserMailingDetails";
+	document.getElementById('addressDetails').submit();
+}
+
+function getUserQualificationDetails(){
+	document.getElementById('qualificationDetails').action="getUserQualificationDetails";
+	document.getElementById('qualificationDetails').submit();
+}
+
+function getUserExperienceDetails(){
+	document.getElementById('experienceDetails').action="getUserExperienceDetails";
+	document.getElementById('experienceDetails').submit();
+}
+
+function getUserOtherDetails(){
+	document.getElementById('otherDetails').action="getUserOtherDetails";
+	document.getElementById('otherDetails').submit();
+}
+
+
+function getPhotoUserSignDetails(){
+	document.getElementById('uploadPhotoSign').action="getPhotoUserSignDetails";
+	document.getElementById('uploadPhotoSign').submit();
+}
+
+function getUserDocumentDetails(){
+	document.getElementById('uploadDocuments').action="getUserDocumentDetails";
+	document.getElementById('uploadDocuments').submit();
+}
+
+function openUserConfirmationScreen(){
+	document.getElementById('confirmationScreen').action="openUserConfirmationScreen";
+	document.getElementById('confirmationScreen').submit();
+}
+
+function getSocialEconomicDetails(){
+	document.getElementById('socialEconomicDetails').action="getSocialEconomicDetails";
+	document.getElementById('socialEconomicDetails').submit();
+}
+
+function validateCategory(obj){
+	
+	/***************For Category Document ***********************/
+	if(obj.value=="" || obj.value=='General' || obj.value=='SC'){
+		document.getElementById('idCategoryDoc').style.display="none";
+	}else{
+		document.getElementById('idCategoryDoc').style.display="table-row";
+	}
+	
+	
+	/***************For belongsToDonefiedTribe question***********************/
+	if(obj.value=='General' || obj.value=='EWS'){
+		   document.getElementById('idbelongsToDonefiedTribe').style.display="table-row";
+	}else{
+		   document.getElementById('idbelongsToDonefiedTribe').style.display="none";
+		   elements=['belongsToDonefiedTribe'];
+		   clearRounf2Inputs(elements);
+	}	
+	
+	/***************For Creamy Layer Question question***********************/
+	if(obj.value=='BCA' || obj.value=='BCB'){
+		   document.getElementById('qualifyCreamyLayer').style.display="table-row";
+	}else{
+		   document.getElementById('qualifyCreamyLayer').style.display="none";
+		   elements=['qualifyForNonCreamyLayer'];
+		   clearRounf2Inputs(elements);
+	}	
+	
+}
+
+function clearRounf2Inputs(params){
+	for(i=0; i<params.length;i++){
+		var option = document
+		.getElementsByName(params[i]);
+		option[0].checked=false;
+		option[1].checked=false;
+	}
+}
+
+function validationRegInputs(obj){
+	var hryDomecile=obj.value;
+	
+/************************PH and ESM Ques validation********************************/	
+	var radioElements = ['exServiceman'];
+	var fileRows =['idDomecileDoc','idCategoryDoc','idEsmDoc','idDenotifiedDoc',
+		'idEsmIdCardDoc','idEsmDischargeDoc','idEsmEligibilityDoc'];
+	
+	fileRowsLen=fileRows.length;
+	radioEleLength = radioElements.length;
+	
+	for (i = 0; i < radioEleLength; i++) {
+		var option = document
+		.getElementsByName(radioElements[i])
+		
+		if(hryDomecile=='N'){
+			option[0].disabled = true;
+			option[1].disabled = true; 
+			option[1].checked = true;
+			
+		}else{
+			option[0].disabled = false;
+			option[1].disabled = false;
+			option[1].checked = false;
+		}
+	}
+	
+/****************Category and domecile and doc validation*****************************/
+	if(hryDomecile=='N'){
+		var cat="General";
+		var catForIteration = document.getElementById('categoryValidate');
+		for(var i, j = 0; i = catForIteration.options[j]; j++) {
+		    if(i.value == cat) {
+		    	catForIteration.selectedIndex = j;
+		        break;
+		    }
+		}
+		document.getElementById('categoryValidate').disabled=true;		 
+		document.getElementById('idDomecileDoc').style.display="none";
+	}else{
+		document.getElementById('categoryValidate').disabled=false;
+		document.getElementById('idDomecileDoc').style.display="table-row";
+		
+		document.getElementById('otherCategory').value="";
+		var cat="";
+		var catForIteration = document.getElementById('categoryValidate');
+		for(var i, j = 0; i = catForIteration.options[j]; j++) {
+		    if(i.value == cat) {
+		    	catForIteration.selectedIndex = j;
+		        break;
+		    }
+		}
+	}
+	
+/****************Files Rows validation*****************************/	
+	if(hryDomecile=='N'){ 
+		for (i = 0; i < fileRowsLen; i++) {
+			document.getElementById(fileRows[i]).style.display="none";
+		}
+		
+/****************ESM other parameters validation*****************************/			
+		/*document.getElementById('totalService').style.display="none";
+		document.getElementById('totalServiceYearsValidate').value="";*/
+		
+		document.getElementById('armedForceCategoryId').style.display="none";
+		var cat="";
+		var catForIteration = document.getElementById('idArmedForceCatValidate');
+		for(var i, j = 0; i = catForIteration.options[j]; j++) {
+		    if(i.value == cat) {
+		    	catForIteration.selectedIndex = j;
+		        break;
+		    }
+		}
+		
+		document.getElementById('idDateOfDischarge').style.display="none";
+    	document.getElementById('dateOfDischargeValidate').value=""; 
+    	document.getElementById('idDateOfEntry').style.display="none";
+    	document.getElementById('dateOfJoiningValidate').value=""; 
+    	document.getElementById('idDisabilityPercentage').style.display="none";
+    	document.getElementById('disabilityPercentageValidate').value=""; 
+    	
+    	document.getElementById('yearsCalculate').innerHTML ="";
+	    document.getElementById('monthCalculate').innerHTML ="";
+	    document.getElementById('idServiceYears').style.display = "none";
+
+/****************DonefiedTribe validation*****************************/			
+		document.getElementById('idbelongsToDonefiedTribe').style.display="none";
+		elements=['belongsToDonefiedTribe'];
+		clearRounf2Inputs(elements);
+		
+		
+/****************Non creamy check validation*****************************/	
+		document.getElementById('qualifyCreamyLayer').style.display="none";
+		elements=['qualifyForNonCreamyLayer'];
+		clearRounf2Inputs(elements);
+	}
+	
+}
+
+function sendOtp(){
+	var mobileNo = $("#mobileNumberValidate").val();
+	var applicationId = $("#applicationId").val();
+	$.ajax({
+		  type:"POST",
+		  url:"sendOtpMobileUser",
+		  data: 'mobileNo='+mobileNo+'&applicationId='+applicationId,
+		  success:function(response){
+			  if(response != ""){
+				  document.getElementById('mobileNumberValidateErr').innerHTML="OTP Sent!";
+				  document.getElementById('mobileNumberValidateErr').style.display="block";
+				  document.getElementById('sendId').style.display="none";
+				  document.getElementById('mobileNoOtp').style.display="block";
+				  document.getElementById('verifyId1').style.display="block";
+				  document.getElementById('resendId').style.display="block";
+			  }
+			  else{
+				  document.getElementById('mobileNumberValidateErr').innerHTML="Error while sending OTP!";
+				  document.getElementById('mobileNumberValidateErr').style.display="block";
+				  document.getElementById('sendId').style.display="block";
+				  document.getElementById('mobileNoOtp').style.display="none";
+				  document.getElementById('verifyId1').style.display="none";
+			  }
+		  },
+	  	  error:function(response){
+	  		document.getElementById('mobileNumberValidateErr').innerHTML="Error while sending OTP!";
+			  document.getElementById('mobileNumberValidateErr').style.display="block";
+			  document.getElementById('sendId').style.display="block";
+			  document.getElementById('mobileNoOtp').style.display="none";
+			  document.getElementById('verifyId1').style.display="none";
+	  	  }
+	  });
+}
+
+function verifyOtp(){
+	document.getElementById('sendId').style.display="none";
+	var mobileNoOtp = $("#mobileNoOtp").val();
+	var mobileNo = $("#mobileNumberValidate").val();
+	$.ajax({
+		  type:"POST",
+		  url:"verifyOtpMobileUser",
+		  data: 'mobileNoOtp='+mobileNoOtp+'&mobileNo='+mobileNo,
+		  success:function(response){
+			  if(response != ""){
+				  document.getElementById('otpStatus').value="verified";
+				  document.getElementById('mobileNumberValidateErr').innerHTML="OTP Verfied!";
+				  document.getElementById('mobileNumberValidateErr').style.display="block";
+				  document.getElementById('sendId').style.display="none";
+				  document.getElementById('verifyId1').style.display="none";
+				  document.getElementById('mobileNoOtp').style.display="none";
+				  return true;
+			  }
+			  else{
+				  document.getElementById('otpStatus').value="";
+				  document.getElementById('mobileNumberValidateErr').innerHTML="Invalid OTP!";
+				  document.getElementById('mobileNumberValidateErr').style.display="block";
+				  document.getElementById('verifyId1').style.display="block";
+				  document.getElementById('mobileNoOtp').style.display="block";
+				  return false;
+			  }
+		  },
+	  	  error:function(response){
+	  		document.getElementById('otpStatus').value="";
+	  		document.getElementById('mobileNumberValidateErr').innerHTML="Invalid OTP!";
+			  document.getElementById('mobileNumberValidateErr').style.display="block";
+			  document.getElementById('verifyId1').style.display="block";
+			  document.getElementById('mobileNoOtp').style.display="block";
+	  		return false;
+	  	  }
+	  });
+}
+function showOtpVerify(){
+	var mNum = $("#mNum").val();
+	var mNumNew = $("#mobileNumberValidate").val();
+	if(mNum != mNumNew){
+		document.getElementById('sendId').style.display="block";
+		document.getElementById('otpStatus').value="";
+	}
+	else{
+		document.getElementById('sendId').style.display="none";
+		document.getElementById('otpStatus').value="verified";
+	}
+}
+/*function checkOtp(mobileNoVerified){
+	if(mobileNoVerified == true){
+		document.getElementById('otpStatus').value="verified";
+	}
+	else{
+		document.getElementById('sendId').style.display="block";
+		
+	} 
+}*/
+
+function payNow(){
+	document.getElementById('paymentForm').action = "makehpscPayment";
+	document.getElementById('paymentForm').method = "post";
+	document.getElementById('paymentForm').submit();
+}
+function showSendOtp(){
+	document.getElementById('sendId').style.display="block";
+	document.getElementById('resendId').style.display="none";
+	document.getElementById('verifyId1').style.display="none";
+	  document.getElementById('mobileNoOtp').style.display="none";
+}
+
+function uplooadDoc(fileId,errorId){
+	var fileObj=document.getElementById(fileId);
+	
+	     ext!="pdf" && ext!="jpg" && ext!="jpeg" && ext!="png"
+		
+		 if(fileObj.value!=""){
+		     var ext = fileObj.value.split('.').pop();
+		  }
+		
+		if(fileObj.value==""){
+			  $("#" + errorId).focus();
+				document.getElementById(errorId).innerHTML = "Please select the file to upload";
+				document.getElementById(errorId).style.display = "Block";
+			  return false;
+		}else if(ext.toLowerCase()!="pdf" && ext.toLowerCase()!="jpg" && ext.toLowerCase()!="jpeg" && ext.toLowerCase()!="png"){
+			 $("#" + errorId).focus();
+				document.getElementById(errorId).innerHTML = "Please upload the file in .pdf,.jpg,.jpeg,.png format Only.";
+				document.getElementById(errorId).style.display = "Block";
+			  return false;
+			  
+		  }else if(fileObj.files[0].size > 512000){
+	          $("#" + errorId).focus();
+				document.getElementById(errorId).innerHTML = "Maximum file size to be uploaded should not be greater than 500 KB";
+				document.getElementById(errorId).style.display = "Block";
+			  return false;
+		  }else{
+			  document.getElementById('uploadDocuments').action="uploadUserDocuments";
+			  document.getElementById('uploadDocuments').submit();
+		  }
+}
+
+function uplooadUserDocAjax(className,errorId,formId,categoryId){
+	//var fileObj=document.getElementById(fileId); 
+	
+	 document.getElementById(formId).enctype = "multipart/form-data";
+	  var elements = document.getElementsByClassName(className);
+	  var fileObj = elements[0];
+	
+    ext!="pdf" && ext!="jpg" && ext!="jpeg" && ext!="png"
+	
+	 if(fileObj.value!=""){
+	     var ext = fileObj.value.split('.').pop();
+	  }
+	
+	if(fileObj.value==""){
+		  $("#" + errorId).focus();
+			document.getElementById(errorId).innerHTML = "Please select the file to upload";
+			document.getElementById(errorId).style.display = "Block";
+		  return false;
+	}else if(ext.toLowerCase()!="pdf" && ext.toLowerCase()!="jpg" && ext.toLowerCase()!="jpeg" && ext.toLowerCase()!="png"){
+		 $("#" + errorId).focus();
+			document.getElementById(errorId).innerHTML = "Please upload the file in .pdf,.jpg,.jpeg,.png format Only.";
+			document.getElementById(errorId).style.display = "Block";
+		  return false;
+		  
+	  }else if(fileObj.files[0].size > 512000){
+         $("#" + errorId).focus();
+			document.getElementById(errorId).innerHTML = "Maximum file size to be uploaded should not be greater than 500 KB";
+			document.getElementById(errorId).style.display = "Block";
+		  return false;
+	  }else{
+		  
+		  var data = new FormData();
+		  var csrfToken = document.getElementById("csrf-token").value;
+		  
+		  data.append('file', fileObj);
+		  data.append('idDocumentCategory', categoryId);
+		  data.append('_csrf', csrfToken);
+		  
+		  $.ajax({
+			    type : "post",
+			    url : "uploadUserDocument",
+			    data : data,
+			    cache: false,
+			    contentType: false,
+			    processData: false,			
+			    dataType: 'json',
+			    complete : function(response){
+			    	var message = JSON.stringify(response.responseText);
+			    	message = message.replace("\"","");
+			    	message = message.replace("\"","");
+			    	document.getElementById("fileMessage").innerHTML=message;
+			    	document.getElementById("file").value='';
+			    	$('html, body').css("cursor", "auto");
+			    	$(collection).each(function(a){
+			    		  if( $(this).is(':disabled') ) {
+			    		    $(this).prop('disabled', false);
+			    		  }
+			    		});			    	
+			    },
+			    error : function() {
+			    	$('html, body').css("cursor", "auto");
+			    	$(collection).each(function(a){
+			    		  if( $(this).is(':disabled') ) {
+			    		    $(this).prop('disabled', false);
+			    		  }
+			    		});			    						    				    	
+			    } });
+		  
+		  /*document.getElementById(formId).action="uploadUserDocument";
+		  document.getElementById(formId).submit();*/
+	  }
+}
+
+function uplooadUserDoc(className,errorId,formId){
+	var elements = document.getElementsByClassName(className);
+	var fileObj = elements[0];
+	
+	     ext!="pdf" && ext!="jpg" && ext!="jpeg" && ext!="png"
+		
+		 if(fileObj.value!=""){
+		     var ext = fileObj.value.split('.').pop();
+		  }
+		
+		if(fileObj.value==""){
+			  $("#" + errorId).focus();
+				document.getElementById(errorId).innerHTML = "Please select the file to upload";
+				document.getElementById(errorId).style.display = "Block";
+			  return false;
+		}else if(ext.toLowerCase()!="pdf" && ext.toLowerCase()!="jpg" && ext.toLowerCase()!="jpeg" && ext.toLowerCase()!="png"){
+			 $("#" + errorId).focus();
+				document.getElementById(errorId).innerHTML = "Please upload the file in .pdf,.jpg,.jpeg,.png format Only.";
+				document.getElementById(errorId).style.display = "Block";
+			  return false;
+			  
+		  }else if(fileObj.files[0].size > 512000){
+	          $("#" + errorId).focus();
+				document.getElementById(errorId).innerHTML = "Maximum file size to be uploaded should not be greater than 500 KB";
+				document.getElementById(errorId).style.display = "Block";
+			  return false;
+		  }else{
+			  document.getElementById(formId).action="uploadUserDocument";
+			  document.getElementById(formId).submit();
+		  }
+}
+
+function uploadUserDoc(formId){
+	
+	var validation=0;
+	if(formId=='personalDetails'){
+		var elements=['nameOfIssuingAuthorityValidate','dateOfIssueValidate','referenceNoValidate','fileValidate'];
+		var errors=['nameOfIssuingAuthorityValidateErr','dateOfIssueValidateErr','referenceNoValidateErr','fileValidateErr'];
+		var msg=['Name Of Issuing Authority','Date of issue','Reference Number'];
+	}else if(formId=='registrationDetails'){
+		var elements=['nameOfIssuingAuthorityValidateReg','dateOfIssueValidateReg','referenceNoValidateReg','fileValidateReg'];
+		var errors=['nameOfIssuingAuthorityValidateRegErr','dateOfIssueValidateRegErr','referenceNoValidateRegErr','fileValidateRegErr'];
+		var msg=['Name Of Issuing Authority','Date of issue','Reference Number'];
+	}
+	
+	
+	eleLength = elements.length;
+	
+	for (i = 0; i < eleLength; i++) {
+		if(!elements[i].includes('fileValidate')){	
+			if (document.getElementById(elements[i]).value == "" || document.getElementById(elements[i]).value =="0") {
+				var error = elements[i];
+				$("#" + error).focus();
+				document.getElementById(errors[i]).innerHTML = "Please enter/select "
+						+ msg[i];
+				document.getElementById(errors[i]).style.display = "Block";
+				validation=validation+1;
+			}else{
+				document.getElementById(errors[i]).style.display = " ";
+			}
+		}else{
+			if(formId=='personalDetails'){
+				var file = document.getElementById(elements[i]+"File");
+			}else if(formId=='registrationDetails'){
+				var file = document.getElementById(elements[i]+"FileReg"); 
+			}
+			if (!file || file.innerHTML.trim()== '') {
+				var selectedFile = document.getElementsByClassName(elements[i]);
+				var fileObj = selectedFile[0];
+				
+				if(fileObj.value!=""){
+					var ext = fileObj.value.split('.').pop();
+					if(ext.toLowerCase()!="pdf" && ext.toLowerCase()!="jpg" && ext.toLowerCase()!="jpeg" && ext.toLowerCase()!="png"){
+						 $("#" + errors[j]).focus();
+							document.getElementById(errors[i]).innerHTML = "Please upload the file in .pdf,.jpg,.jpeg,.png format Only.";
+							document.getElementById(errors[i]).style.display = "Block";
+							validation=validation+1;
+						  
+					  }else if(fileObj.files[0].size > 512000){
+						  $("#" + errors[i]).focus();
+							document.getElementById(errors[i]).innerHTML = "Maximum file size to be uploaded should not be greater than 500 KB";
+							document.getElementById(errors[i]).style.display = "Block";
+							validation=validation+1;
+					  }
+				}else{
+					document.getElementById(errors[i]).innerHTML = "Please Attach required document";
+					document.getElementById(errors[i]).style.display = "Block";
+					e.preventDefault();
+					validation=validation+1;
+				}
+			}else{
+				document.getElementById(errors[i]).style.display = " ";
+			}
+		}
+	}
+	
+	if(validation==0){
+		document.getElementById(formId).action="uploadUserDocument";
+		document.getElementById(formId).submit();
+	}
+}
+
+function downloadDoc(idDocumentCategory,fileName){
+	 var forms = document.forms;
+	 var formId;
+	 for (var i = 0; i < forms.length; i++) {
+		 if(forms[i].id=='uploadDocuments' || forms[i].id=='applicationPreview'){
+			 formId=forms[i].id;
+		 }
+	 }
+	document.getElementById('idDocumentCategory').value=idDocumentCategory;
+	document.getElementById('fileName').value=fileName;
+	document.getElementById(formId).action="downloadUserDocuments";
+	document.getElementById(formId).submit();
+}
+
+function downloadDocPreview(idDocumentCategory,fileName){
+	document.getElementById('idDocumentCategory').value=idDocumentCategory;
+	document.getElementById('fileName').value=fileName;
+	document.getElementById('applicationPreview').action="downloadUserDocuments";
+	document.getElementById('applicationPreview').submit();
+}
+
+function downloadDocFileName(fileName,formId){
+	document.getElementById('fileNameQualification').value=fileName;
+	document.getElementById('fileNameExperience').value=fileName;
+	document.getElementById(formId).action="downloadDocFileName";
+	document.getElementById(formId).submit();
+}
+
+function downloadAnnexure(fileName,formId){
+	document.getElementById('annexureFileNameexp').value=fileName;
+	document.getElementById('annexureFileNameReg').value=fileName;
+	document.getElementById('annexureFileName').value=fileName;
+	document.getElementById(formId).action="downloadAnnexureDocument";
+	document.getElementById(formId).submit();
+}
+
+function downloadPreviewDoc(idDocumentCategory,fileName){
+	document.getElementById('idDocumentCategory').value=idDocumentCategory;
+	document.getElementById('fileName').value=fileName;
+	document.getElementById('applicationPreview').action="downloadUserDocuments";
+	document.getElementById('applicationPreview').submit();    
+}
+
+
+function showDeletePop(idDocumentCategory){
+	document.getElementById('idDocCategory').value=idDocumentCategory;
+	document.getElementById('deleteUserDoc').style.display="block"; 
+	document.getElementById('showP').style.display="block"; 
+}
+
+function showPop(idDocumentCategory){
+	if(idDocumentCategory!=""){
+		document.getElementById('idcategory').value=idDocumentCategory;
+		document.getElementById('deleteCandDoc').style.display="block";
+	}else{
+		document.getElementById('qualificationCheck').style.display="block";
+	}
+	
+	document.getElementById('showP').style.display="block";
+}
+
+function hidePop(){
+	document.getElementById('showP').style.display="none";
+} 
+
+function hidePopPersonal(){
+	document.getElementById('showPersonal').style.display="none";
+}
+
+function hidePopRegistration(){
+	document.getElementById('showRegistration').style.display="none";
+}
+
+function deleteDoc(){
+	var idDocCategory=document.getElementById('idcategory').value;
+	if(null!=idcategory){
+		document.getElementById('deleteCandDoc').action="deleteUserDocuments"; 	
+		document.getElementById('deleteCandDoc').submit();
+	}else{
+		return null;
+	}
+	
+}
+function deleteUserDoc(idDocCategory,formId){
+	document.getElementById('idDocCategory').value=idDocCategory;
+	document.getElementById('idDocCategoryPersonal').value=idDocCategory;
+	document.getElementById('idDocCategoryConfirmation').value=idDocCategory;
+	
+	
+	document.getElementById(formId).action="deleteUserDocument";
+	document.getElementById(formId).submit();
+	
+}
+
+function showAknowledgeMent(obj){
+	var ack=obj.value;
+	if(ack=='Y'){
+		document.getElementById('showP').style.display="block";
+		document.getElementById('aknowledgementYes').style.display="block";
+		document.getElementById('aknowledgementNo').style.display="none";
+	}else{
+		document.getElementById('showP').style.display="block";
+		document.getElementById('aknowledgementNo').style.display="block";
+		document.getElementById('aknowledgementYes').style.display="none";
+	}
+	
+}
+
+function checkMaxMarks(maxMarks,marksObtained,error){
+	var mMarks=document.getElementById(maxMarks).value;
+	var mObtained=document.getElementById(marksObtained).value;
+	
+	if(mMarks!=""){
+		if(parseFloat(mObtained)>parseFloat(mMarks)){
+			document.getElementById(error).innerHTML = "Obtained Marks/CGPA Should not be greater than Maximum Marks/CGPA";
+			document.getElementById(marksObtained).value = "";
+		    document.getElementById(error).style.display = "Block";
+		}else{
+			 document.getElementById(error).style.display = "none";
+		}
+	}else{
+		document.getElementById(marksObtained).value = "";
+		document.getElementById(error).innerHTML = "Please Enter Max Marks/CGPA First";
+	    document.getElementById(error).style.display = "Block";
+	}
+}
+
+function checkExperienceDates(endDateId,startDateId){
+	startDateString=document.getElementById(startDateId).value;
+	endDateString=document.getElementById(endDateId).value;
+	
+	var components = startDateString.split("-");
+	var startday = parseInt(components[0]);
+	var startmonth = monthMap[components[1]];
+	var startyear = parseInt(components[2]);
+	
+	var startDate = new Date(startyear, startmonth, startday);
+	
+	var components = endDateString.split("-");
+	var endday = parseInt(components[0]);
+	var endmonth = monthMap[components[1]];
+	var endyear = parseInt(components[2]);
+	
+	var endDate = new Date(endyear, endmonth, endday);
+	
+	if (!isEndDateGreaterThanStartDate(startDate, endDate)) {
+		document.getElementById(endDateId+'Err').innerHTML = "Employment end date should be greater than employment start date";
+		document.getElementById(endDateId+'Err').style.display = "block";
+	} else {
+		document.getElementById(endDateId+'Err').style.display = "none";
+	}
+}
+
+function isEndDateGreaterThanStartDate(startDate, endDate) {
+    return endDate > startDate;
+}
+
+
+function checkServiceYearsDates(dischargeId,entryId){
+	startDateString=document.getElementById(entryId).value;
+	endDateString=document.getElementById(dischargeId).value;
+	
+	var components = startDateString.split("-");
+	var startday = parseInt(components[0]);
+	var startmonth = monthMap[components[1]];
+	var startyear = parseInt(components[2]);
+	
+	var startDate = new Date(startyear, startmonth, startday);
+	
+	var components = endDateString.split("-");
+	var endday = parseInt(components[0]);
+	var endmonth = monthMap[components[1]];
+	var endyear = parseInt(components[2]);
+	
+	var endDate = new Date(endyear, endmonth, endday);
+	endDate.setDate(endDate.getDate() + 1);
+	
+	
+	if (!isEndDateGreaterThanStartDate(startDate, endDate)) {
+		document.getElementById(dischargeId+'Err').innerHTML = "Discharge date should be greater than entry date";
+		document.getElementById(dischargeId+'Err').style.display = "block";
+		document.getElementById('yearsCalculate').innerHTML ="";
+	    document.getElementById('monthCalculate').innerHTML ="";
+	    document.getElementById('idServiceYears').style.display = "none";
+	}else{
+		document.getElementById(dischargeId+'Err').style.display = "none";
+		
+		var diffYears = endDate.getFullYear() - startDate.getFullYear();
+	    var diffMonths = endDate.getMonth() - startDate.getMonth();
+	    if (diffMonths < 0) {
+	        diffYears--;
+	        diffMonths += 12;
+	    }
+	    
+	    document.getElementById('idServiceYearsInput').value =diffYears; 
+	    document.getElementById('idServiceMonthInput').value =diffMonths; 
+	    
+	    document.getElementById('yearsCalculate').innerHTML =diffYears;
+	    document.getElementById('monthCalculate').innerHTML =diffMonths;
+	    document.getElementById('idServiceYears').style.display = "table-row";
+	}
+}
+
+
+var monthMap = {
+	    "Jan": 0,
+	    "Feb": 1,
+	    "Mar": 2,
+	    "Apr": 3,
+	    "May": 4,
+	    "Jun": 5,
+	    "Jul": 6,
+	    "Aug": 7,
+	    "Sep": 8,
+	    "Oct": 9,
+	    "Nov": 10,
+	    "Dec": 11
+	};
+
+
+function docPopUp(index,idDocumentCategory,fileName,nameOfIssuingAuthority,dateOfIssue,
+		referenceNo,documentName,formId,idDocCathiddenId,divId){
+	
+	document.getElementById(idDocCathiddenId).value =idDocumentCategory;
+	document.getElementById(idDocCathiddenId).name = "docList[" + index + "].idDocumentCategory";
+	
+	if(formId=='personalDetails'){
+		document.getElementById('documentNameCheckInput').innerHTML =documentName;
+		
+		document.getElementById('nameOfIssuingAuthorityValidate').value =nameOfIssuingAuthority; 
+		document.getElementById('nameOfIssuingAuthorityValidate').name = "docList[" + index + "].nameOfIssuingAuthority";
+		
+		document.getElementById('dateOfIssueValidate').value =dateOfIssue;
+		document.getElementById('dateOfIssueValidate').name = "docList[" + index + "].dateOfIssue";
+		
+		document.getElementById('referenceNoValidate').value =referenceNo;
+		document.getElementById('referenceNoValidate').name = "docList[" + index + "].referenceNo";
+		
+		document.getElementById('attachedFile').innerHTML =fileName;
+		var element = document.querySelector('.fileValidate');
+		element.name = "docList[" + index + "].file";
+	}else if(formId=='registrationDetails'){
+		document.getElementById('documentNameCheckInputReg').innerHTML =documentName;
+		
+		document.getElementById('nameOfIssuingAuthorityValidateReg').value =nameOfIssuingAuthority; 
+		document.getElementById('nameOfIssuingAuthorityValidateReg').name = "docList[" + index + "].nameOfIssuingAuthority";
+		
+		document.getElementById('dateOfIssueValidateReg').value =dateOfIssue;
+		document.getElementById('dateOfIssueValidateReg').name = "docList[" + index + "].dateOfIssue";
+		
+		document.getElementById('referenceNoValidateReg').value =referenceNo;
+		document.getElementById('referenceNoValidateReg').name = "docList[" + index + "].referenceNo";
+		
+		document.getElementById('attachedFileReg').innerHTML =fileName;
+		var element = document.querySelector('.fileValidateReg');
+		element.name = "docList[" + index + "].file";
+	}
+	
+	
+	document.getElementById(divId).style.display = "Block";
+	
+}
+
