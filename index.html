@@ -3,9 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dhillon</title>
+    <title>Rock Paper Scissors Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script src="app.js"></script>
+    <div class="game">
+        <h1>Rock Paper Scissors</h1>
+        <div class="score-board">
+            <div class="score">
+                <p>User</p>
+                <p id="player-score">0</p>
+            </div>
+            <div class="score">
+                <p>Computer</p>
+                <p id="computer-score">0</p>
+            </div>
+        </div>
+        <div class="choices">
+            <button class="choice" data-choice="rock">
+                <img src="Rock.png" alt="Rock">
+            </button>
+            <button class="choice" data-choice="paper">
+                <img src="Paper.png" alt="Paper">
+            </button>
+            <button class="choice" data-choice="scissors">
+                <img src="Scissor.png" alt="Scissors">
+            </button>
+        </div>
+        <div id="result">Choose your weapon!</div>
+    </div>
+    <script src="game.js"></script>
 </body>
 </html>

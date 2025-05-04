@@ -1,61 +1,68 @@
-let userScore = 0;
-let compScore = 0;
-const choices = document.querySelectorAll(".choice");
-const msg = document.querySelector("#msg");
-const userScorePara= document.querySelector("#user-score");
-const compScorePara= document.querySelector("#comp-score");
+const choices = document.querySelectorAll('.choice');
+const playerScore = document.getElementById('player-score');
+const computerScore = document.getElementById('computer-score');
+const result = document.getElementById('result');
 
-const genComputerChoice = () => {
-const options =["rock","paper","scissor"];
-const randIdx = Math.floor(Math.random()*3);
-return options[randIdx];
-}
-const gameDraw= ()=>{
-    console.log("game was draw");
-    msg.innerText= "Game is draw!!";
-    msg.style.backgroundColor = "#081b31";
-}
-const showWinner = (userWin,userChoice,CompChoice)=>{
-    if(userWin){
-        userScore++;
-        userScorePara.innerText = userScore;
-        
-        msg.innerText = `You win !! your  ${userChoice} beats ${CompChoice}`
-        msg.style.backgroundColor = "green";
-    }else{
-        compScore++;
-        compScorePara.innerText = compScore;
-        
-        msg.innerText = `You lose!! ${CompChoice} beats your ${userChoice}`;
-        msg.style.backgroundColor = "red";
+let playerPoints = 0;
+let computerPoints = 0;
+
+const getComputerChoice = () => {
+    const options = ['rock', 'paper', 'scissors'];
+    const randomIndex = Math.floor(Math.random() * 3);
+    return options[randomIndex];
+};
+
+const getWinner = (playerChoice, computerChoice) => {
+    if (playerChoice === computerChoice) {
+        return 'draw';
     }
-}
 
-const playGame = (userChoice)=>{
-console.log("user choice is",userChoice)
-const CompChoice = genComputerChoice();
-console.log("computer choice is ",CompChoice);
-if(userChoice === CompChoice){
-    gameDraw();
-}
-else{
-    let userWin = true;
-    if(userChoice=="rock"){
-        userWIn = CompChoice ==="paper"? false:true;
-    }else if(userChoice=="paper"){
-        userWin = CompChoice ==="scissor"?false:true;
-    }else {
-        userWin = CompChoice === "rock"?false:true;
+    const winningConditions = {
+        'rock': 'scissors',     // rock beats scissors
+        'paper': 'rock',        // paper beats rock
+        'scissors': 'paper'     // scissors beats paper
+    };
+
+    if (winningConditions[playerChoice] === computerChoice) {
+        return 'player';
     }
-    showWinner(userWin,userChoice,CompChoice);
-}
 
-}
+    return 'computer';
+};
 
-choices.forEach((choice)=>{
+const updateScore = (winner) => {
+    if (winner === 'player') {
+        playerPoints++;
+        playerScore.textContent = playerPoints;
+    } else if (winner === 'computer') {
+        computerPoints++;
+        computerScore.textContent = computerPoints;
+    }
+};
+
+const displayResult = (winner, playerChoice, computerChoice) => {
+    result.className = winner;
     
-    choice.addEventListener("click",()=>{
-        const userChoice=choice.getAttribute("id");
-    playGame(userChoice);
-});
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+    playerChoice = capitalize(playerChoice);
+    computerChoice = capitalize(computerChoice);
+
+    if (winner === 'draw') {
+        result.textContent = `It's a Draw! Both chose ${playerChoice}`;
+    } else if (winner === 'player') {
+        result.textContent = `You Win! ${playerChoice} beats ${computerChoice}`;
+    } else {
+        result.textContent = `You Lose! ${computerChoice} beats ${playerChoice}`;
+    }
+};
+
+choices.forEach(choice => {
+    choice.addEventListener('click', () => {
+        const playerChoice = choice.dataset.choice;
+        const computerChoice = getComputerChoice();
+        const winner = getWinner(playerChoice, computerChoice);
+        
+        updateScore(winner);
+        displayResult(winner, playerChoice, computerChoice);
+    });
 });
